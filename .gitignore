@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+grievance/node_modules/
+
+# Production builds
+dist/
+build/
+
+# Local files and databases
+*.xlsx
+
+# Environment variables
+.env
+.env.local
