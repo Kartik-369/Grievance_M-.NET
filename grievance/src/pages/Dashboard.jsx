@@ -1,180 +1,149 @@
 import { useNavigate } from 'react-router-dom'
-import { FileText, Clock, CheckCircle, XCircle, AlertCircle, Plus, ArrowRight } from 'lucide-react'
+import { Plus, ArrowRight } from 'lucide-react'
 import { GRIEVANCES, STATUSES, CATEGORIES } from '../data/dummy'
 
-// ── helpers ────────────────────────────────────────────────
-const getStatus  = id => STATUSES.find(s => s.id === id)
-const getCategory= id => CATEGORIES.find(c => c.id === id)
+const getStatus   = id => STATUSES.find(s => s.id === id)
+const getCategory = id => CATEGORIES.find(c => c.id === id)
 
-// ── stat card ──────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, color }) {
-  const colors = {
-    blue:   'bg-blue-50 text-blue-600 border-blue-100',
-    yellow: 'bg-yellow-50 text-yellow-600 border-yellow-100',
-    green:  'bg-green-50 text-green-600 border-green-100',
-    red:    'bg-red-50 text-red-600 border-red-100',
-  }
+const STATUS_CSS = { 
+  1: 'bg-yellow-100 text-yellow-800', 
+  2: 'bg-blue-100 text-blue-800', 
+  3: 'bg-green-100 text-green-800', 
+  4: 'bg-red-100 text-red-800' 
+}
+
+function StatCard({ label, value, sub }) {
   return (
-    <div className="stat-card p-5 flex items-center gap-4">
-      <div className={`w-12 h-12 rounded-xl border flex items-center justify-center flex-shrink-0 ${colors[color]}`}>
-        <Icon size={21} />
-      </div>
+    <div className="bg-white border border-slate-200 rounded-lg p-5">
       <div>
-        <div className="text-2xl font-black text-gray-800">{value}</div>
-        <div className="text-xs font-semibold text-gray-500">{label}</div>
+        <div className="text-[26px] font-bold text-slate-900">{value}</div>
+        <div className="text-[12.5px] text-slate-500 mt-0.5 font-medium">{label}</div>
+        {sub && <div className="text-[11.5px] text-slate-400 mt-0.5">{sub}</div>}
       </div>
     </div>
   )
 }
 
-// ── Admin dashboard ────────────────────────────────────────
-function AdminDashboard({ navigate }) {
+function BarRow({ label, count, total }) {
+  const pct = total > 0 ? Math.round((count / total) * 100) : 0
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-slate-500 w-[110px] shrink-0">{label}</span>
+      <div className="flex-1 bg-slate-100 rounded-[4px] h-1.5 overflow-hidden">
+        <div className="h-full bg-blue-600 rounded-[4px] transition-all duration-500" style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-xs font-semibold text-slate-600 w-5 text-right">{count}</span>
+    </div>
+  )
+}
+
+function RecentTable({ rows, navigate }) {
+  return (
+    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center">
+        <span className="font-semibold text-[13px] text-slate-900">Recent Grievances</span>
+        <button onClick={() => navigate('/grievances')} className="flex items-center gap-1 text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors">
+          View all <ArrowRight size={12} />
+        </button>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            <tr>
+              <th className="px-4 py-2.5">ID</th>
+              <th className="px-4 py-2.5">Title</th>
+              <th className="px-4 py-2.5">Category</th>
+              <th className="px-4 py-2.5">Status</th>
+              <th className="px-4 py-2.5">Date</th>
+            </tr>
+          </thead>
+          <tbody className="text-[13px]">
+            {rows.map(g => {
+              const st  = getStatus(g.statusId)
+              const cat = getCategory(g.categoryId)
+              return (
+                <tr key={g.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => navigate(`/grievances/${g.id}`)}>
+                  <td className="px-4 py-3"><span className="font-mono text-xs font-semibold text-blue-600">{g.id}</span></td>
+                  <td className="px-4 py-3 max-w-[260px] truncate"><span className="font-medium text-slate-800">{g.title}</span></td>
+                  <td className="px-4 py-3"><span className="text-xs text-slate-500">{cat?.name}</span></td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11.5px] font-medium ${STATUS_CSS[g.statusId]}`}>{st?.name}</span>
+                  </td>
+                  <td className="px-4 py-3"><span className="text-xs text-slate-400">{g.date}</span></td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+export default function Dashboard({ user }) {
+  const navigate   = useNavigate()
   const total      = GRIEVANCES.length
   const pending    = GRIEVANCES.filter(g => g.statusId === 1).length
   const inProgress = GRIEVANCES.filter(g => g.statusId === 2).length
   const resolved   = GRIEVANCES.filter(g => g.statusId === 3).length
+  const rejected   = GRIEVANCES.filter(g => g.statusId === 4).length
 
   return (
-    <>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={FileText}    label="Total Grievances" value={total}      color="blue" />
-        <StatCard icon={Clock}       label="Pending"          value={pending}    color="yellow" />
-        <StatCard icon={AlertCircle} label="In Progress"      value={inProgress} color="blue" />
-        <StatCard icon={CheckCircle} label="Resolved"         value={resolved}   color="green" />
-      </div>
-
-      {/* Category breakdown */}
-      <div className="card p-5 mb-4">
-        <h3 className="section-title mb-4"><BarChart label="By Category" /></h3>
-        <div className="space-y-2.5">
-          {CATEGORIES.map(cat => {
-            const count = GRIEVANCES.filter(g => g.categoryId === cat.id).length
-            const pct   = Math.round((count / total) * 100) || 0
-            return (
-              <div key={cat.id} className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 w-28 flex-shrink-0">{cat.name}</span>
-                <div className="flex-1 bg-gray-100 rounded-full h-2">
-                  <div className="h-2 rounded-full bg-[var(--navy)]" style={{ width: `${pct}%`, transition: 'width .6s ease' }} />
-                </div>
-                <span className="text-xs font-bold text-gray-600 w-6 text-right">{count}</span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      <RecentTable navigate={navigate} />
-    </>
-  )
-}
-
-// ── Agent dashboard ────────────────────────────────────────
-function AgentDashboard({ navigate }) {
-  // Agent sees only in-progress (assigned) grievances
-  const assigned = GRIEVANCES.filter(g => g.statusId === 2)
-  return (
-    <>
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <StatCard icon={ClipboardIcon} label="Assigned to Me" value={assigned.length} color="blue" />
-        <StatCard icon={CheckCircle}   label="Resolved"       value={GRIEVANCES.filter(g=>g.statusId===3).length} color="green" />
-      </div>
-      <RecentTable navigate={navigate} filter={g => g.statusId === 2} title="My Active Assignments" />
-    </>
-  )
-}
-
-// ── Student dashboard ──────────────────────────────────────
-function StudentDashboard({ navigate }) {
-  const mine = GRIEVANCES // student sees all (single user)
-  return (
-    <>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={FileText}    label="Total Raised"  value={mine.length} color="blue" />
-        <StatCard icon={Clock}       label="Pending"       value={mine.filter(g=>g.statusId===1).length} color="yellow" />
-        <StatCard icon={AlertCircle} label="In Progress"   value={mine.filter(g=>g.statusId===2).length} color="blue" />
-        <StatCard icon={CheckCircle} label="Resolved"      value={mine.filter(g=>g.statusId===3).length} color="green" />
-      </div>
-      <RecentTable navigate={navigate} />
-    </>
-  )
-}
-
-// ── Shared: recent table ────────────────────────────────────
-function RecentTable({ navigate, filter = () => true, title = 'Recent Grievances' }) {
-  const rows = GRIEVANCES.filter(filter).slice(0, 4)
-  return (
-    <div className="card overflow-hidden">
-      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-        <span className="section-title">{title}</span>
-        <button onClick={() => navigate('/grievances')} className="text-xs text-[var(--navy)] font-semibold flex items-center gap-1 hover:underline">
-          View all <ArrowRight size={12} />
-        </button>
-      </div>
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>ID</th><th>Title</th><th>Category</th><th>Status</th><th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(g => {
-            const st  = getStatus(g.statusId)
-            const cat = getCategory(g.categoryId)
-            return (
-              <tr key={g.id} className="cursor-pointer" onClick={() => navigate(`/grievances/${g.id}`)}>
-                <td><span className="font-mono text-xs font-bold text-[var(--navy)]">{g.id}</span></td>
-                <td><span className="font-medium text-sm">{g.title}</span></td>
-                <td><span className="text-xs text-gray-500">{cat?.name}</span></td>
-                <td><span className={`badge ${st?.css}`}>{st?.name}</span></td>
-                <td><span className="text-xs text-gray-400">{g.date}</span></td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-// tiny helpers to avoid import issues in inline comps
-function ClipboardIcon(props) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/>
-    </svg>
-  )
-}
-function BarChart({ label }) {
-  return <span className="text-sm font-bold text-[var(--navy)]">{label}</span>
-}
-
-// ── Main export ────────────────────────────────────────────
-export default function Dashboard({ user }) {
-  const navigate = useNavigate()
-  const firstName = user.name.split(' ')[0]
-
-  return (
-    <div className="animate-fade-in">
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-5">
+    <div className="animate-in fade-in duration-200">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-xl font-black text-gray-800">
-            Welcome back, {firstName} 👋
-          </h1>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {user.role} Dashboard · {new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
-          </p>
+          <div className="text-lg font-bold text-slate-900">Dashboard</div>
+          <div className="text-[13px] text-slate-500 mt-0.5">{user.name} &middot; {user.role}</div>
         </div>
         {user.role === 'Student' && (
-          <button id="raise-grievance-btn" onClick={() => navigate('/grievances/new')} className="btn-danger btn-sm">
-            <Plus size={13} /> Raise Grievance
+          <button onClick={() => navigate('/grievances/new')} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors">
+            <Plus size={13} /> New Grievance
           </button>
         )}
       </div>
 
-      {user.role === 'Admin'   && <AdminDashboard   navigate={navigate} />}
-      {user.role === 'Agent'   && <AgentDashboard   navigate={navigate} />}
-      {user.role === 'Student' && <StudentDashboard navigate={navigate} />}
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+        <StatCard label="Total"       value={total}      />
+        <StatCard label="Pending"     value={pending}    />
+        <StatCard label="In Progress" value={inProgress} />
+        <StatCard label="Resolved"    value={resolved}   />
+      </div>
+
+      {user.role === 'Admin' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+          <div className="bg-white border border-slate-200 rounded-lg p-4">
+            <div className="font-semibold text-[13px] mb-3.5 text-slate-800">By Category</div>
+            <div className="flex flex-col gap-2.5">
+              {CATEGORIES.map(c => (
+                <BarRow key={c.id} label={c.name} count={GRIEVANCES.filter(g => g.categoryId === c.id).length} total={total} />
+              ))}
+            </div>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-lg p-4">
+            <div className="font-semibold text-[13px] mb-3.5 text-slate-800">By Status</div>
+            <div className="flex flex-col gap-4 mt-2">
+              {[
+                { label: 'Pending',     count: pending,    color: 'bg-yellow-500' },
+                { label: 'In Progress', count: inProgress, color: 'bg-blue-600' },
+                { label: 'Resolved',    count: resolved,   color: 'bg-green-600' },
+                { label: 'Rejected',    count: rejected,   color: 'bg-red-600' },
+              ].map(s => (
+                <div key={s.label} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2.5 h-2.5 rounded-full ${s.color}`} />
+                    <span className="text-[13px] text-slate-600">{s.label}</span>
+                  </div>
+                  <span className="font-bold text-[16px] text-slate-900">{s.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <RecentTable rows={GRIEVANCES.slice(0, 5)} navigate={navigate} />
     </div>
   )
 }

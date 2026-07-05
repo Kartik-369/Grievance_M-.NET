@@ -1,120 +1,110 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Send } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { CATEGORIES } from '../../data/dummy'
 
-// Options declared locally — only used on this page
 const PRIORITIES = [
-  { id: 1, name: 'Low' },
-  { id: 2, name: 'Medium' },
-  { id: 3, name: 'High' },
-  { id: 4, name: 'Critical' },
+  { id: 1, name: 'Low' }, { id: 2, name: 'Medium' },
+  { id: 3, name: 'High' }, { id: 4, name: 'Critical' },
 ]
 
 export default function AddGrievance() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({
-    title: '', categoryId: '', priorityId: '', description: '',
-  })
+  const [form, setForm]       = useState({ title: '', categoryId: '', priorityId: '', description: '' })
+  const [errors, setErrors]   = useState({})
   const [submitted, setSubmitted] = useState(false)
-  const [errors, setErrors] = useState({})
 
-  const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const validate = () => {
     const e = {}
-    if (!form.title.trim())       e.title       = 'Title is required'
-    if (!form.categoryId)         e.categoryId  = 'Please select a category'
-    if (!form.priorityId)         e.priorityId  = 'Please select a priority'
-    if (!form.description.trim()) e.description = 'Description is required'
+    if (!form.title.trim())       e.title       = 'Required'
+    if (!form.categoryId)         e.categoryId  = 'Required'
+    if (!form.priorityId)         e.priorityId  = 'Required'
+    if (!form.description.trim()) e.description = 'Required'
     return e
   }
 
-  const handleSubmit = (e) => {
+  const submit = (e) => {
     e.preventDefault()
     const e2 = validate()
     if (Object.keys(e2).length) { setErrors(e2); return }
     setSubmitted(true)
-    setTimeout(() => navigate('/grievances'), 1800)
+    setTimeout(() => navigate('/grievances'), 1500)
   }
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
-        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-          <span className="text-green-600 text-3xl">✓</span>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-xl text-green-600 font-bold">
+          &#10003;
         </div>
-        <h2 className="text-xl font-black text-gray-800 mb-1">Grievance Submitted!</h2>
-        <p className="text-sm text-gray-500">Redirecting to your grievances list...</p>
+        <div className="font-bold text-lg text-slate-900">Grievance Submitted</div>
+        <div className="text-[13px] text-slate-500">Redirecting...</div>
       </div>
     )
   }
 
   return (
-    <div className="animate-fade-in max-w-2xl">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <button onClick={() => navigate(-1)} className="btn-outline btn-sm p-2">
-          <ArrowLeft size={14} />
+    <div className="animate-in fade-in duration-200 max-w-2xl mx-auto lg:mx-0">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={() => navigate(-1)} className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors">
+          <ArrowLeft size={16} />
         </button>
         <div>
-          <h1 className="text-xl font-black text-gray-800">Raise a Grievance</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Fill in the details below and submit</p>
+          <div className="text-lg font-bold text-slate-900">New Grievance</div>
+          <div className="text-[13px] text-slate-500 mt-0.5">Fill in the details and submit</div>
         </div>
       </div>
 
-      <div className="card p-6">
-        <form onSubmit={handleSubmit} className="space-y-5">
-
-          {/* Title */}
+      <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
+        <form onSubmit={submit} className="flex flex-col gap-5">
           <div>
-            <label className="form-label">Grievance Title <span className="text-red-500">*</span></label>
-            <input id="grv-title" type="text" className={`form-input ${errors.title ? 'border-red-400' : ''}`}
-              placeholder="Brief title describing your issue"
-              value={form.title} onChange={e => set('title', e.target.value)} />
-            {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Title</label>
+            <input 
+              className={`w-full border rounded-md px-3 py-2 text-[13.5px] text-slate-900 focus:outline-none focus:ring-1 transition-colors ${errors.title ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-300 focus:border-blue-600 focus:ring-blue-600'}`}
+              placeholder="Brief title for your grievance"
+              value={form.title} onChange={e => set('title', e.target.value)} 
+            />
+            {errors.title && <div className="text-[11.5px] text-red-600 mt-1">{errors.title}</div>}
           </div>
 
-          {/* Category + Priority */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="form-label">Category <span className="text-red-500">*</span></label>
-              <select id="grv-category" className={`form-input ${errors.categoryId ? 'border-red-400' : ''}`}
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Category</label>
+              <select 
+                className={`w-full border rounded-md px-3 py-2 text-[13.5px] focus:outline-none focus:ring-1 transition-colors ${errors.categoryId ? 'border-red-500 focus:border-red-500 focus:ring-red-500 text-slate-900' : 'border-slate-300 focus:border-blue-600 focus:ring-blue-600 text-slate-900'}`}
                 value={form.categoryId} onChange={e => set('categoryId', e.target.value)}>
-                <option value="">Select category</option>
+                <option value="">Select</option>
                 {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
-              {errors.categoryId && <p className="text-xs text-red-500 mt-1">{errors.categoryId}</p>}
+              {errors.categoryId && <div className="text-[11.5px] text-red-600 mt-1">{errors.categoryId}</div>}
             </div>
             <div>
-              <label className="form-label">Priority <span className="text-red-500">*</span></label>
-              <select id="grv-priority" className={`form-input ${errors.priorityId ? 'border-red-400' : ''}`}
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Priority</label>
+              <select 
+                className={`w-full border rounded-md px-3 py-2 text-[13.5px] focus:outline-none focus:ring-1 transition-colors ${errors.priorityId ? 'border-red-500 focus:border-red-500 focus:ring-red-500 text-slate-900' : 'border-slate-300 focus:border-blue-600 focus:ring-blue-600 text-slate-900'}`}
                 value={form.priorityId} onChange={e => set('priorityId', e.target.value)}>
-                <option value="">Select priority</option>
+                <option value="">Select</option>
                 {PRIORITIES.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
-              {errors.priorityId && <p className="text-xs text-red-500 mt-1">{errors.priorityId}</p>}
+              {errors.priorityId && <div className="text-[11.5px] text-red-600 mt-1">{errors.priorityId}</div>}
             </div>
           </div>
 
-          {/* Description */}
           <div>
-            <label className="form-label">Description <span className="text-red-500">*</span></label>
-            <textarea id="grv-description"
-              className={`form-input resize-none ${errors.description ? 'border-red-400' : ''}`}
-              rows={5} placeholder="Describe your grievance in detail..."
-              value={form.description} onChange={e => set('description', e.target.value)} />
-            {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Description</label>
+            <textarea 
+              className={`w-full border rounded-md px-3 py-2 text-[13.5px] text-slate-900 focus:outline-none focus:ring-1 transition-colors resize-y ${errors.description ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-slate-300 focus:border-blue-600 focus:ring-blue-600'}`}
+              rows={5} placeholder="Describe your grievance in detail"
+              value={form.description} onChange={e => set('description', e.target.value)}
+            />
+            {errors.description && <div className="text-[11.5px] text-red-600 mt-1">{errors.description}</div>}
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3 pt-2">
-            <button id="submit-grievance" type="submit" className="btn-primary">
-              <Send size={13} /> Submit Grievance
-            </button>
-            <button type="button" onClick={() => navigate(-1)} className="btn-outline">
-              Cancel
-            </button>
+          <div className="flex gap-2.5 pt-2">
+            <button type="submit" className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-[13px] font-medium rounded-md hover:bg-blue-700 transition-colors">Submit</button>
+            <button type="button" onClick={() => navigate(-1)} className="inline-flex items-center justify-center px-4 py-2 bg-transparent text-slate-700 border border-slate-300 text-[13px] font-medium rounded-md hover:bg-slate-50 transition-colors">Cancel</button>
           </div>
         </form>
       </div>

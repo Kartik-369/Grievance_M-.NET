@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { User, Mail, Shield, Camera, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 
 export default function Profile({ user }) {
-  const [form, setForm]     = useState({ name: user?.name || 'Kartik Balkrishna', email: 'kartik@darshan.ac.in', mobile: '9876543210' })
-  const [saved, setSaved]   = useState(false)
-  const initials = form.name.split(' ').map(n => n[0]).join('').slice(0, 2)
+  const [form, setForm]   = useState({ name: user?.name || 'Kartik Balkrishna', email: 'kartik@example.com', mobile: '9876543210' })
+  const [saved, setSaved] = useState(false)
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const save = (e) => {
     e.preventDefault()
@@ -12,69 +13,52 @@ export default function Profile({ user }) {
     setTimeout(() => setSaved(false), 2000)
   }
 
+  const initials = form.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+
   return (
-    <div className="animate-fade-in max-w-xl">
-      <div className="mb-5">
-        <h1 className="text-xl font-black text-gray-800">My Profile</h1>
-        <p className="text-xs text-gray-500 mt-0.5">View and update your personal information</p>
+    <div className="animate-in fade-in duration-200 max-w-[500px]">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
+        <div>
+          <div className="text-lg font-bold text-slate-900">Profile</div>
+          <div className="text-[13px] text-slate-500 mt-0.5">Manage your account information</div>
+        </div>
       </div>
 
-      {/* Avatar */}
-      <div className="card p-6 mb-4">
-        <div className="flex items-center gap-5">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-400 to-blue-600 flex items-center justify-center text-white font-black text-2xl">
-              {initials}
-            </div>
-            <button className="absolute -bottom-1 -right-1 w-7 h-7 bg-[var(--navy)] rounded-full flex items-center justify-center text-white hover:bg-[var(--navy-light)] transition-colors">
-              <Camera size={12} />
-            </button>
-          </div>
-          <div>
-            <div className="font-black text-lg text-gray-800">{form.name}</div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <Shield size={12} className="text-indigo-500" />
-              <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                {user?.role}
-              </span>
-            </div>
-          </div>
+      {/* Avatar row */}
+      <div className="bg-white border border-slate-200 rounded-lg p-5 mb-4 flex items-center gap-4 shadow-sm">
+        <div className="w-[52px] h-[52px] rounded-full bg-blue-900 flex items-center justify-center text-[18px] font-bold text-white shrink-0">
+          {initials}
+        </div>
+        <div>
+          <div className="font-bold text-[15px] text-slate-900">{form.name}</div>
+          <div className="text-[12.5px] text-slate-500 mt-0.5">{user?.role}</div>
         </div>
       </div>
 
       {/* Form */}
-      <div className="card p-6">
-        <form onSubmit={save} className="space-y-4">
+      <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+        <form onSubmit={save} className="flex flex-col gap-4">
           <div>
-            <label className="form-label">Full Name</label>
-            <div className="relative">
-              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input className="form-input pl-9" value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-            </div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Full Name</label>
+            <input className="w-full border border-slate-300 rounded-md px-3 py-2 text-[13.5px] text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors" value={form.name} onChange={e => set('name', e.target.value)} />
           </div>
           <div>
-            <label className="form-label">Email Address</label>
-            <div className="relative">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input className="form-input pl-9" type="email" value={form.email}
-                onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-            </div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email</label>
+            <input className="w-full border border-slate-300 rounded-md px-3 py-2 text-[13.5px] text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors" type="email" value={form.email} onChange={e => set('email', e.target.value)} />
           </div>
           <div>
-            <label className="form-label">Mobile Number</label>
-            <input className="form-input" value={form.mobile}
-              onChange={e => setForm(f => ({ ...f, mobile: e.target.value }))} />
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Mobile</label>
+            <input className="w-full border border-slate-300 rounded-md px-3 py-2 text-[13.5px] text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors" value={form.mobile} onChange={e => set('mobile', e.target.value)} />
           </div>
           <div>
-            <label className="form-label">Role</label>
-            <input className="form-input bg-gray-50 text-gray-400 cursor-not-allowed" value={user?.role || ''} readOnly />
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Role</label>
+            <input className="w-full border border-slate-200 rounded-md px-3 py-2 text-[13.5px] text-slate-400 bg-slate-50 cursor-not-allowed" value={user?.role || ''} readOnly />
           </div>
-
-          <button id="save-profile-btn" type="submit"
-            className={`btn-primary ${saved ? 'bg-green-600' : ''}`}>
-            {saved ? <><Check size={13}/> Saved!</> : 'Save Changes'}
-          </button>
+          <div className="pt-2">
+            <button type="submit" className={`inline-flex items-center gap-1.5 px-4 py-2 text-white text-[13px] font-medium rounded-md transition-colors ${saved ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+              {saved ? <><Check size={13} /> Saved</> : 'Save Changes'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
