@@ -1,41 +1,17 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, Bell, ChevronDown, User, LogOut,
-         LayoutDashboard, AlertCircle, FileText, ClipboardList,
-         Users, Tag, Settings, BarChart2 } from 'lucide-react'
-
-const NAV_BY_ROLE = {
-  Admin:   [
-    { label: 'Dashboard',       icon: LayoutDashboard, path: '/dashboard' },
-    { label: 'Grievances',      icon: AlertCircle,      path: '/grievances' },
-    { label: 'Users',           icon: Users,            path: '/admin/users' },
-    { label: 'Categories',      icon: Tag,              path: '/admin/categories' },
-    { label: 'Status',          icon: Settings,         path: '/admin/status' },
-    { label: 'Reports',         icon: BarChart2,        path: '/admin/reports' },
-  ],
-  Agent:   [
-    { label: 'Dashboard',       icon: LayoutDashboard, path: '/dashboard' },
-    { label: 'Assignments',     icon: ClipboardList,   path: '/agent/assignments' },
-  ],
-  Student: [
-    { label: 'Dashboard',       icon: LayoutDashboard, path: '/dashboard' },
-    { label: 'My Grievances',   icon: FileText,        path: '/grievances' },
-    { label: 'New Grievance',   icon: AlertCircle,     path: '/grievances/new' },
-  ],
-}
+import { Link, useNavigate } from 'react-router-dom'
+import { Menu, X, Bell, ChevronDown, User, LogOut } from 'lucide-react'
 
 export default function Navbar({ user, onLogout, sidebarOpen, setSidebarOpen }) {
-  const location  = useLocation()
-  const navigate  = useNavigate()
+  const navigate = useNavigate()
   const [drop, setDrop] = useState(false)
-  const navItems  = NAV_BY_ROLE[user.role] || []
-  const initials  = user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  const initials = user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 
   const doLogout = () => { setDrop(false); onLogout(); navigate('/login') }
 
   return (
     <nav className="bg-slate-900 h-14 flex items-center px-4 sticky top-0 z-50 border-b border-white/10">
-      <div className="flex items-center justify-between w-full gap-3">
+      <div className="flex items-center justify-between w-full">
 
         {/* Left */}
         <div className="flex items-center gap-3 shrink-0">
@@ -50,26 +26,6 @@ export default function Navbar({ user, onLogout, sidebarOpen, setSidebarOpen }) 
           <span className="text-[12px] text-white/50 whitespace-nowrap hidden sm:inline">
             {user.role} Portal
           </span>
-        </div>
-
-        {/* Centre links — desktop only */}
-        <div className="hidden lg:flex items-center gap-1 flex-1 justify-center overflow-hidden">
-          {navItems.map(item => {
-            const Icon   = item.icon
-            const active = location.pathname === item.path ||
-              (item.path !== '/dashboard' && location.pathname.startsWith(item.path))
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[12.5px] font-medium transition-colors whitespace-nowrap ${
-                  active ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Icon size={13} /> {item.label}
-              </Link>
-            )
-          })}
         </div>
 
         {/* Right */}
