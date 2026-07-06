@@ -2,10 +2,10 @@
 
 export const CATEGORIES = [
   { id: 1, name: 'Academic', css: 'badge-inprogress' },
-  { id: 2, name: 'Hostel', css: 'badge-medium' },
+  { id: 2, name: 'Internship and placement', css: 'badge-medium' },
   { id: 3, name: 'Fee & Finance', css: 'badge-high' },
-  { id: 4, name: 'Library', css: 'badge-low' },
-  { id: 5, name: 'IT Support', css: 'badge-pending' },
+  { id: 4, name: 'Hostel', css: 'badge-low' },
+  { id: 5, name: 'Transport service', css: 'badge-pending' },
 ]
 
 export const STATUSES = [
