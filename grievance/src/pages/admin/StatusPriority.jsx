@@ -18,9 +18,28 @@ function Table({ title, rows, setRows }) {
   const [editing, setEditing] = useState(null)
   const [val,     setVal]     = useState('')
 
-  const start  = r => { setEditing(r.id); setVal(r.name) }
-  const save   = id => { setRows(r => r.map(x => x.id === id ? { ...x, name: val } : x)); setEditing(null) }
-  const cancel = () => setEditing(null)
+  const start = (r) => {
+    setEditing(r.id)
+    setVal(r.name)
+  }
+
+  const save = (id) => {
+    setRows(r => r.map(x => {
+      if (x.id === id) {
+        return { ...x, name: val }
+      }
+      return x
+    }))
+    setEditing(null)
+  }
+
+  const cancel = () => {
+    setEditing(null)
+  }
+
+  const handleValChange = (e) => {
+    setVal(e.target.value)
+  }
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
@@ -36,27 +55,35 @@ function Table({ title, rows, setRows }) {
             </tr>
           </thead>
           <tbody className="text-[13px]">
-            {rows.map((r, i) => (
-              <tr key={r.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                <td className="px-4 py-3 text-slate-400 text-xs">{i + 1}</td>
-                <td className="px-4 py-3">
-                  {editing === r.id
-                    ? <input className="w-full border border-slate-300 rounded-md px-2.5 py-1 text-[13px] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors" value={val} onChange={e => setVal(e.target.value)} autoFocus />
-                    : <span className="font-medium text-slate-800">{r.name}</span>
-                  }
-                </td>
-                <td className="px-4 py-3"><span className={`inline-flex items-center px-2 py-0.5 rounded text-[11.5px] font-medium ${r.css}`}>{r.name}</span></td>
-                <td className="px-4 py-3">
-                  {editing === r.id
-                    ? <div className="flex gap-2">
-                        <button onClick={() => save(r.id)} className="p-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"><Check size={12} /></button>
-                        <button onClick={cancel} className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-slate-200 rounded transition-colors"><X size={12} /></button>
-                      </div>
-                    : <button onClick={() => start(r)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded transition-colors"><Edit2 size={12} /></button>
-                  }
-                </td>
-              </tr>
-            ))}
+            {rows.map((r, i) => {
+              const handleStart = () => {
+                start(r)
+              }
+              const handleSave = () => {
+                save(r.id)
+              }
+              return (
+                <tr key={r.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3 text-slate-400 text-xs">{i + 1}</td>
+                  <td className="px-4 py-3">
+                    {editing === r.id
+                      ? <input className="w-full border border-slate-300 rounded-md px-2.5 py-1 text-[13px] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors" value={val} onChange={handleValChange} autoFocus />
+                      : <span className="font-medium text-slate-800">{r.name}</span>
+                    }
+                  </td>
+                  <td className="px-4 py-3"><span className={`inline-flex items-center px-2 py-0.5 rounded text-[11.5px] font-medium ${r.css}`}>{r.name}</span></td>
+                  <td className="px-4 py-3">
+                    {editing === r.id
+                      ? <div className="flex gap-2">
+                          <button onClick={handleSave} className="p-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"><Check size={12} /></button>
+                          <button onClick={cancel} className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-slate-200 rounded transition-colors"><X size={12} /></button>
+                        </div>
+                      : <button onClick={handleStart} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded transition-colors"><Edit2 size={12} /></button>
+                    }
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

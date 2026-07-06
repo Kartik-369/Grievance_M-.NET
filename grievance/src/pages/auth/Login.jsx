@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 
-const ROLES = ['Admin', 'Agent', 'Student']
+const ROLES = ['Admin', 'Student']
 
 export default function Login({ onLogin }) {
   const [role,     setRole]     = useState('Student')
@@ -12,23 +12,40 @@ export default function Login({ onLogin }) {
 
   const submit = (e) => {
     e.preventDefault()
-    if (password !== 'abc') { setError('Incorrect password.'); return }
+    if (password !== 'abc') {
+      setError('Incorrect password.')
+      return
+    }
     setError('')
     setLoading(true)
-    setTimeout(() => { setLoading(false); onLogin(role) }, 400)
+    setTimeout(() => {
+      setLoading(false)
+      onLogin(role)
+    }, 400)
+  }
+
+  const toggleShow = () => {
+    setShow(!show)
+  }
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value)
+    setError('')
+  }
+
+  const handleRoleSelect = (r) => {
+    setRole(r)
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
       <div className="w-full max-w-[380px]">
 
-        {/* Logo */}
         <div className="mb-7">
           <div className="text-[22px] font-bold text-slate-900 tracking-tight">GMS</div>
           <div className="text-[13px] text-slate-500 mt-0.5">Grievance Management System</div>
         </div>
 
-        {/* Card */}
         <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-7">
           <div className="mb-5.5">
             <div className="text-[15px] font-bold text-slate-900">Sign in</div>
@@ -38,15 +55,14 @@ export default function Login({ onLogin }) {
           </div>
 
           <form onSubmit={submit}>
-            {/* Role */}
             <div className="mb-4">
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Login as</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {ROLES.map(r => (
                   <button
                     key={r}
                     type="button"
-                    onClick={() => setRole(r)}
+                    onClick={() => handleRoleSelect(r)}
                     className={`px-1 py-2 rounded-md text-[13px] font-semibold transition-all border-[1.5px] ${
                       role === r 
                         ? 'border-blue-600 bg-blue-50 text-blue-700' 
@@ -59,7 +75,6 @@ export default function Login({ onLogin }) {
               </div>
             </div>
 
-            {/* Password */}
             <div className="mb-5">
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Password</label>
               <div className="relative">
@@ -70,12 +85,12 @@ export default function Login({ onLogin }) {
                   }`}
                   placeholder="Enter password"
                   value={password}
-                  onChange={e => { setPassword(e.target.value); setError('') }}
+                  onChange={handlePasswordChange}
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setShow(!show)}
+                  onClick={toggleShow}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {show ? <EyeOff size={15} /> : <Eye size={15} />}

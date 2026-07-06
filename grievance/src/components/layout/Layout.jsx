@@ -4,11 +4,9 @@ import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
 export default function Layout({ user, onLogout }) {
-  // Auto-collapse sidebar on smaller screens initially
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024)
   const location = useLocation()
 
-  // Ensure window resize handles it gracefully
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
@@ -18,10 +16,14 @@ export default function Layout({ user, onLogout }) {
       }
     }
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
   }, [])
 
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100">

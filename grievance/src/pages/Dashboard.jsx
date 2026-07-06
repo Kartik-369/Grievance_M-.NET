@@ -2,8 +2,13 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, ArrowRight } from 'lucide-react'
 import { GRIEVANCES, STATUSES, CATEGORIES } from '../data/dummy'
 
-const getStatus   = id => STATUSES.find(s => s.id === id)
-const getCategory = id => CATEGORIES.find(c => c.id === id)
+const getStatus = (id) => {
+  return STATUSES.find(s => s.id === id)
+}
+
+const getCategory = (id) => {
+  return CATEGORIES.find(c => c.id === id)
+}
 
 const STATUS_CSS = { 
   1: 'bg-yellow-100 text-yellow-800', 
@@ -38,11 +43,15 @@ function BarRow({ label, count, total }) {
 }
 
 function RecentTable({ rows, navigate }) {
+  const goToList = () => {
+    navigate('/grievances')
+  }
+
   return (
     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center">
         <span className="font-semibold text-[13px] text-slate-900">Recent Grievances</span>
-        <button onClick={() => navigate('/grievances')} className="flex items-center gap-1 text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors">
+        <button onClick={goToList} className="flex items-center gap-1 text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors">
           View all <ArrowRight size={12} />
         </button>
       </div>
@@ -61,8 +70,11 @@ function RecentTable({ rows, navigate }) {
             {rows.map(g => {
               const st  = getStatus(g.statusId)
               const cat = getCategory(g.categoryId)
+              const goDetail = () => {
+                navigate(`/grievances/${g.id}`)
+              }
               return (
-                <tr key={g.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => navigate(`/grievances/${g.id}`)}>
+                <tr key={g.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer" onClick={goDetail}>
                   <td className="px-4 py-3"><span className="font-mono text-xs font-semibold text-blue-600">{g.id}</span></td>
                   <td className="px-4 py-3 max-w-[260px] truncate"><span className="font-medium text-slate-800">{g.title}</span></td>
                   <td className="px-4 py-3"><span className="text-xs text-slate-500">{cat?.name}</span></td>
@@ -88,22 +100,24 @@ export default function Dashboard({ user }) {
   const resolved   = GRIEVANCES.filter(g => g.statusId === 3).length
   const rejected   = GRIEVANCES.filter(g => g.statusId === 4).length
 
+  const handleNew = () => {
+    navigate('/grievances/new')
+  }
+
   return (
     <div className="animate-in fade-in duration-200">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
         <div>
           <div className="text-lg font-bold text-slate-900">Dashboard</div>
           <div className="text-[13px] text-slate-500 mt-0.5">{user.name} &middot; {user.role}</div>
         </div>
         {user.role === 'Student' && (
-          <button onClick={() => navigate('/grievances/new')} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors">
+          <button onClick={handleNew} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors">
             <Plus size={13} /> New Grievance
           </button>
         )}
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         <StatCard label="Total"       value={total}      />
         <StatCard label="Pending"     value={pending}    />
@@ -116,9 +130,10 @@ export default function Dashboard({ user }) {
           <div className="bg-white border border-slate-200 rounded-lg p-4">
             <div className="font-semibold text-[13px] mb-3.5 text-slate-800">By Category</div>
             <div className="flex flex-col gap-2.5">
-              {CATEGORIES.map(c => (
-                <BarRow key={c.id} label={c.name} count={GRIEVANCES.filter(g => g.categoryId === c.id).length} total={total} />
-              ))}
+              {CATEGORIES.map(c => {
+                const count = GRIEVANCES.filter(g => g.categoryId === c.id).length
+                return <BarRow key={c.id} label={c.name} count={count} total={total} />
+              })}
             </div>
           </div>
           <div className="bg-white border border-slate-200 rounded-lg p-4">

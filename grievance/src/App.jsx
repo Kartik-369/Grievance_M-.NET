@@ -10,15 +10,18 @@ import Users from './pages/admin/Users'
 import Categories from './pages/admin/Categories'
 import StatusPriority from './pages/admin/StatusPriority'
 import Reports from './pages/admin/Reports'
-import Assignments from './pages/agent/Assignments'
 import Profile from './pages/Profile'
 
 export default function App() {
-  // Auth state — single user Kartik, role chosen at login
-  const [user, setUser] = useState(null) // { name, role }
+  const [user, setUser] = useState(null)
 
-  const login = (role) => setUser({ name: 'Kartik Balkrishna', role })
-  const logout = () => setUser(null)
+  const login = (role) => {
+    setUser({ name: 'Kartik', role: role })
+  }
+
+  const logout = () => {
+    setUser(null)
+  }
 
   return (
     <BrowserRouter>
@@ -38,7 +41,6 @@ export default function App() {
           <Route path="/admin/categories"    element={<Categories />} />
           <Route path="/admin/status"        element={<StatusPriority />} />
           <Route path="/admin/reports"       element={<Reports />} />
-          <Route path="/agent/assignments"   element={<Assignments user={user} />} />
           <Route path="/profile"             element={<Profile user={user} />} />
           <Route path="*"                    element={<Navigate to="/dashboard" replace />} />
         </Route>

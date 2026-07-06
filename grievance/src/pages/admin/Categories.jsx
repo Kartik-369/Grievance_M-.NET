@@ -8,18 +8,47 @@ export default function Categories() {
   const [name,  setName]  = useState('')
   const [err,   setErr]   = useState('')
 
-  const openAdd  = () => { setName(''); setErr(''); setModal('add') }
-  const openEdit = c => { setName(c.name); setErr(''); setModal(c) }
-  const close    = () => setModal(null)
+  const openAdd = () => {
+    setName('')
+    setErr('')
+    setModal('add')
+  }
+
+  const openEdit = (c) => {
+    setName(c.name)
+    setErr('')
+    setModal(c)
+  }
+
+  const close = () => {
+    setModal(null)
+  }
+
+  const handleNameChange = (e) => {
+    setName(e.target.value)
+  }
 
   const save = () => {
-    if (!name.trim()) { setErr('Name is required.'); return }
-    if (modal === 'add') setCats(c => [...c, { id: Date.now(), name: name.trim(), css: 'bg-blue-100 text-blue-800' }])
-    else setCats(c => c.map(x => x.id === modal.id ? { ...x, name: name.trim() } : x))
+    if (!name.trim()) {
+      setErr('Name is required.')
+      return
+    }
+    if (modal === 'add') {
+      setCats(c => [...c, { id: Date.now(), name: name.trim(), css: 'bg-blue-100 text-blue-800' }])
+    } else {
+      setCats(c => c.map(x => {
+        if (x.id === modal.id) {
+          return { ...x, name: name.trim() }
+        }
+        return x
+      }))
+    }
     close()
   }
 
-  const remove = id => setCats(c => c.filter(x => x.id !== id))
+  const remove = (id) => {
+    setCats(c => c.filter(x => x.id !== id))
+  }
 
   return (
     <div className="animate-in fade-in duration-200">
@@ -42,18 +71,26 @@ export default function Categories() {
               </tr>
             </thead>
             <tbody className="text-[13px]">
-              {cats.map((c, i) => (
-                <tr key={c.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 text-slate-400 text-xs">{i + 1}</td>
-                  <td className="px-4 py-3 font-medium text-slate-800">{c.name}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button onClick={() => openEdit(c)} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded transition-colors"><Edit2 size={12} /></button>
-                      <button onClick={() => remove(c.id)} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded transition-colors"><Trash2 size={12} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {cats.map((c, i) => {
+                const handleEdit = () => {
+                  openEdit(c)
+                }
+                const handleRemove = () => {
+                  remove(c.id)
+                }
+                return (
+                  <tr key={c.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 text-slate-400 text-xs">{i + 1}</td>
+                    <td className="px-4 py-3 font-medium text-slate-800">{c.name}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button onClick={handleEdit} className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded transition-colors"><Edit2 size={12} /></button>
+                        <button onClick={handleRemove} className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded transition-colors"><Trash2 size={12} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -69,7 +106,7 @@ export default function Categories() {
             <div className="p-5 flex flex-col gap-4">
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Category Name</label>
-                <input className="w-full border border-slate-300 rounded-md px-3 py-2 text-[13.5px] text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Academic" />
+                <input className="w-full border border-slate-300 rounded-md px-3 py-2 text-[13.5px] text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors" value={name} onChange={handleNameChange} placeholder="e.g. Academic" />
                 {err && <div className="text-[12px] text-red-600 mt-1.5">{err}</div>}
               </div>
               <div className="flex gap-2 pt-2">

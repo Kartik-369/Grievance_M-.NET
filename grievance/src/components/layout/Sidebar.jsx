@@ -11,10 +11,6 @@ const NAV_BY_ROLE = {
     { label: 'Status & Priority',icon: Settings,       path: '/admin/status' },
     { label: 'Reports',         icon: BarChart2,       path: '/admin/reports' },
   ],
-  Agent:   [
-    { label: 'Dashboard',       icon: LayoutDashboard, path: '/dashboard' },
-    { label: 'My Assignments',  icon: ClipboardList,   path: '/agent/assignments' },
-  ],
   Student: [
     { label: 'Dashboard',       icon: LayoutDashboard, path: '/dashboard' },
     { label: 'My Grievances',   icon: FileText,        path: '/grievances' },
@@ -26,20 +22,22 @@ export default function Sidebar({ role, open, setOpen }) {
   const location = useLocation()
   const items    = NAV_BY_ROLE[role] || []
 
-  // Auto-close for mobile screens
   const handleClick = () => {
     if (window.innerWidth < 1024) {
       setOpen(false)
     }
   }
 
+  const handleOverlayClick = () => {
+    setOpen(false)
+  }
+
   return (
     <>
-      {/* Mobile backdrop overlay */}
       {open && (
         <div 
           className="fixed inset-0 bg-slate-900/20 z-30 lg:hidden"
-          onClick={() => setOpen(false)}
+          onClick={handleOverlayClick}
         />
       )}
       
