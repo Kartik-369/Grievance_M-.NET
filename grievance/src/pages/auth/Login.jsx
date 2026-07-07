@@ -49,9 +49,6 @@ export default function Login({ onLogin }) {
         <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-7">
           <div className="mb-5.5">
             <div className="text-[15px] font-bold text-slate-900">Sign in</div>
-            <div className="text-[12.5px] text-slate-500 mt-0.5">
-              Password: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[12px]">abc</code>
-            </div>
           </div>
 
           <form onSubmit={submit}>
@@ -111,10 +108,6 @@ export default function Login({ onLogin }) {
               {loading ? 'Signing in...' : `Sign in as ${role}`}
             </button>
           </form>
-        </div>
-
-        <div className="text-center mt-4 text-[11.5px] text-slate-400">
-          Kartik Balkrishna
         </div>
       </div>
     </div>
