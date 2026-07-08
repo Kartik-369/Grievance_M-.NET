@@ -1,0 +1,6 @@
+@grievance_b_HostAddress = http://localhost:5163
+
+GET {{grievance_b_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

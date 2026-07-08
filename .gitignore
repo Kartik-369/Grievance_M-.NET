@@ -1,53 +1,26 @@
-[Dd]ebug/
-[Dd]ebugPS/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bsearch/
-bin/
-obj/
+# --- ROOT FOLDER ---
+.DS_Store
+.vscode/
 .vs/
 .idea/
-.vscode/*
-!.vscode/extensions.json
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
 
-secrets.json
-compositefontcache.data
-*.ToolsOnAir.json
+# --- FRONTEND (grievance) ---
+grievance/node_modules/
+grievance/dist/
+grievance/dist-ssr/
+grievance/.env
+grievance/.env.*.local
+grievance/npm-debug.log*
 
-.dotnet/
-*.chromestatus
-*.ilk
-*.aps
-*.plugin.js
+# --- BACKEND (grievance-b) ---
+grievance-b/[Bb]in/
+grievance-b/[Oo]bj/
+grievance-b/appsettings.Local.json
+grievance-b/appsettings.*.json
+!grievance-b/appsettings.json
+!grievance-b/appsettings.Development.json
+grievance-b/*.user
+grievance-b/*.suo
 
-node_modules/
-/dist
-/dist-ssr
-/build
-/.svelte-kit
-/.next
-/.nuxt
-.vuepress/dist
-.env
-.env.local
-.env.*.local
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-Thumbs.db
-Desktop.ini
-.DS_Store
-*.sublime-workspace
-*.sublime-project
+# --- LOGS & MISC ---
+*.log
