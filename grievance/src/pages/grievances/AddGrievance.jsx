@@ -146,6 +146,16 @@ export default function AddGrievance() {
             {errors.description && <div className="text-[11.5px] text-red-600 mt-1">{errors.description}</div>}
           </div>
 
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Attachments (Optional)</label>
+            <input 
+              type="file"
+              multiple
+              className="w-full border border-slate-300 rounded-md px-3 py-2 text-[13.5px] text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[12px] file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
+            />
+            <div className="text-[11px] text-slate-400 mt-1.5">You can attach photos, documents, or PDFs (max 5MB).</div>
+          </div>
+
           <div className="flex gap-2.5 pt-2">
             <button type="submit" className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-[13px] font-medium rounded-md hover:bg-blue-700 transition-colors">Submit</button>
             <button type="button" onClick={goBack} className="inline-flex items-center justify-center px-4 py-2 bg-transparent text-slate-700 border border-slate-300 text-[13px] font-medium rounded-md hover:bg-slate-50 transition-colors">Cancel</button>

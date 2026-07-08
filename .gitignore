@@ -1,14 +1,27 @@
-# Dependencies
 node_modules/
-grievance/node_modules/
-
-# Production builds
 dist/
-build/
+dist-ssr/
+*.local
 
-# Local files and databases
-*.xlsx
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Environment variables
-.env
-.env.local
+**/bin/
+**/obj/
+
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
