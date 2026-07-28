@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace grievance_b.Models
 {
@@ -6,6 +7,7 @@ namespace grievance_b.Models
     {
         [Key]
         public int UserId { get; set; }
+        [ForeignKey("Roles")]
         public int RoleId { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -13,5 +15,8 @@ namespace grievance_b.Models
         public string Password { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public string ProfilePicturePath { get; set; } = string.Empty;
+        //[ForeignKey("RoleId")]
+        public Roles Roles { get; set; }
+        public ICollection<Grievances> Grievances { get; set; } = new List<Grievances>();
     }
 }
