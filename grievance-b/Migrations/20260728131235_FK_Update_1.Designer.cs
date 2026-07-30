@@ -12,8 +12,8 @@ using grievance_b.Data;
 namespace grievance_b.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260708160315_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260728131235_FK_Update_1")]
+    partial class FK_Update_1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,10 @@ namespace grievance_b.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("AssignmentId");
+
+                    b.HasIndex("AssignedTo");
+
+                    b.HasIndex("GrievanceId");
 
                     b.ToTable("GrievanceAssignments");
                 });
@@ -93,6 +97,12 @@ namespace grievance_b.Migrations
 
                     b.HasKey("StatusHistoryId");
 
+                    b.HasIndex("GrievanceId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UpdatedBy");
+
                     b.ToTable("GrievanceStatusHistory");
                 });
 
@@ -125,6 +135,14 @@ namespace grievance_b.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("GrievanceId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("Priority");
+
+                    b.HasIndex("RaisedBy");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("Grievances");
                 });
@@ -227,7 +245,111 @@ namespace grievance_b.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("RoleId");
+
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("grievance_b.Models.GrievanceAssignments", b =>
+                {
+                    b.HasOne("grievance_b.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("AssignedTo")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("grievance_b.Models.Grievances", "Grievances")
+                        .WithMany()
+                        .HasForeignKey("GrievanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Grievances");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("grievance_b.Models.GrievanceStatusHistory", b =>
+                {
+                    b.HasOne("grievance_b.Models.Grievances", "Grievances")
+                        .WithMany()
+                        .HasForeignKey("GrievanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("grievance_b.Models.Status", "status")
+                        .WithMany()
+                        .HasForeignKey("Status")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("grievance_b.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Grievances");
+
+                    b.Navigation("User");
+
+                    b.Navigation("status");
+                });
+
+            modelBuilder.Entity("grievance_b.Models.Grievances", b =>
+                {
+                    b.HasOne("grievance_b.Models.GrievanceCategories", "GrievanceCategories")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("grievance_b.Models.Priority", "priority")
+                        .WithMany()
+                        .HasForeignKey("Priority")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("grievance_b.Models.User", "User")
+                        .WithMany("Grievances")
+                        .HasForeignKey("RaisedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("grievance_b.Models.Status", "status")
+                        .WithMany()
+                        .HasForeignKey("Status")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GrievanceCategories");
+
+                    b.Navigation("User");
+
+                    b.Navigation("priority");
+
+                    b.Navigation("status");
+                });
+
+            modelBuilder.Entity("grievance_b.Models.User", b =>
+                {
+                    b.HasOne("grievance_b.Models.Roles", "Roles")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Roles");
+                });
+
+            modelBuilder.Entity("grievance_b.Models.Roles", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("grievance_b.Models.User", b =>
+                {
+                    b.Navigation("Grievances");
                 });
 #pragma warning restore 612, 618
         }
