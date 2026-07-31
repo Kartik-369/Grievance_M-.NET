@@ -1,4 +1,4 @@
-﻿using grievance_b.Models;
+using grievance_b.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace grievance_b.Data
@@ -23,9 +23,21 @@ namespace grievance_b.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Grievances>().HasOne(g=>g.User).WithMany(u=> u.Grievances).HasForeignKey(g => g.RaisedBy).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<GrievanceAssignments>().HasOne(ga => ga.User).WithMany().HasForeignKey(ga => ga.AssignedTo).OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<GrievanceStatusHistory>().HasOne(h=>h.status).WithMany().HasForeignKey(h => h.Status).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Grievances>().
+            HasOne(g => g.User)
+            .WithMany(u => u.Grievances)
+            .HasForeignKey(g => g.RaisedBy)
+            .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<GrievanceAssignments>().
+            HasOne(ga => ga.User)
+            .WithMany()
+            .HasForeignKey(ga => ga.AssignedTo)
+            .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<GrievanceStatusHistory>().
+            HasOne(h => h.StatusNavigation)
+            .WithMany()
+            .HasForeignKey(h => h.Status)
+            .OnDelete(DeleteBehavior.NoAction);
 
         }
     }
