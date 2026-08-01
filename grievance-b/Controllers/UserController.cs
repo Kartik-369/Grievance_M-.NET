@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
@@ -23,9 +23,7 @@ namespace grievance_b.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            // Retrieves all records from the Users table
             var users = await _context.Users.ToListAsync();
-
             return Ok(users);
         }
         #endregion
@@ -35,7 +33,6 @@ namespace grievance_b.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
-            // Finds a specific user by their Primary Key (UserId)
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
@@ -44,6 +41,57 @@ namespace grievance_b.Controllers
             }
 
             return Ok(user);
+        }
+        #endregion
+
+        #region Create User
+        [HttpPost]
+        public async Task<IActionResult> Create(User user)
+        {
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        #endregion
+
+        #region Update User
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, User user)
+        {
+            if (id != user.UserId)
+            {
+                return NoContent();
+            }
+            var existingUser = await _context.Users.FindAsync(id);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+            existingUser.RoleId = user.RoleId;
+            existingUser.FirstName = user.FirstName;
+            existingUser.LastName = user.LastName;
+            existingUser.Email = user.Email;
+            existingUser.Password = user.Password;
+            existingUser.IsActive = user.IsActive;
+            existingUser.ProfilePicturePath = user.ProfilePicturePath;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+        #endregion
+        #region Delete User
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
         #endregion
     }
