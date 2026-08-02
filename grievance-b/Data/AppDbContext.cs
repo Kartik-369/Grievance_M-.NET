@@ -18,5 +18,15 @@ namespace grievance_b.Data
         public DbSet<Grievances> Grievances => Set<Grievances>();
         public DbSet<GrievanceAssignments> GrievanceAssignments => Set<GrievanceAssignments>();
         public DbSet<GrievanceStatusHistory> GrievanceStatusHistory => Set<GrievanceStatusHistory>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Grievances>().HasOne(g=>g.User).WithMany(u=> u.Grievances).HasForeignKey(g => g.RaisedBy).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<GrievanceAssignments>().HasOne(ga => ga.User).WithMany().HasForeignKey(ga => ga.AssignedTo).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<GrievanceStatusHistory>().HasOne(h=>h.status).WithMany().HasForeignKey(h => h.Status).OnDelete(DeleteBehavior.NoAction);
+
+        }
     }
 }
