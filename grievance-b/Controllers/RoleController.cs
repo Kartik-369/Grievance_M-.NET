@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
+//using grievance_b.Models;
 using grievance_b.Models;
 
 namespace grievance_b.Controllers
@@ -41,6 +42,31 @@ namespace grievance_b.Controllers
             }
 
             return Ok(role);
+        }
+        #endregion
+
+        #region Create Role
+        [HttpPost]
+        public async Task<IActionResult> Create(Roles role)
+        {
+            await _context.Roles.AddAsync(role);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        #endregion
+
+        #region Update Role
+        [HttpPut("{id}")]
+        public async Task<IActionResult>Update(int id,Roles role)
+        {
+            if(id!=role.RoleId)
+            {
+                return BadRequest();
+            }
+            var existingRole = await _context.Roles.FindAsync(id);
+            existingRole.RoleName = role.RoleName;
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
         #endregion
     }
