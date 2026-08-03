@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 //using grievance_b.Models;
@@ -66,6 +66,23 @@ namespace grievance_b.Controllers
             var existingRole = await _context.Roles.FindAsync(id);
             existingRole.RoleName = role.RoleName;
             await _context.SaveChangesAsync();
+            return NoContent();
+        }
+        #endregion
+
+        #region Delete Role
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var role = await _context.Roles.FindAsync(id);
+            if (role == null)
+            {
+                return NotFound();
+            }
+
+            _context.Roles.Remove(role);
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
         #endregion
