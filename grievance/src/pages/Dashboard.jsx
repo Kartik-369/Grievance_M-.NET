@@ -109,7 +109,9 @@ export default function Dashboard({ user }) {
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
         <div>
           <div className="text-lg font-bold text-slate-900">Dashboard</div>
-          <div className="text-[13px] text-slate-500 mt-0.5">{user.name} &middot; {user.role}</div>
+          <div className="text-[13px] text-slate-500 mt-0.5">
+            {user.firstName ? `${user.firstName} ${user.lastName}` : user.name} &middot; {user.role}
+          </div>
         </div>
         {user.role === 'Student' && (
           <button onClick={handleNew} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors">
