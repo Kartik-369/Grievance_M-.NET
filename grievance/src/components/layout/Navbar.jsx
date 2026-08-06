@@ -22,7 +22,10 @@ export default function Navbar({ user, onLogout, sidebarOpen, setSidebarOpen }) 
   const navigate = useNavigate()
   const location = useLocation()
   const [drop, setDrop] = useState(false)
-  const initials = user.name.slice(0, 2).toUpperCase()
+  const displayName = user.firstName && user.lastName
+    ? `${user.firstName} ${user.lastName}`
+    : user.name || 'User'
+  const initials = `${(user.firstName || user.name || 'U').slice(0,1)}${(user.lastName || '').slice(0,1)}`.toUpperCase()
   const navItems = NAV_BY_ROLE[user.role] || []
 
   const doLogout = () => {
@@ -117,7 +120,7 @@ export default function Navbar({ user, onLogout, sidebarOpen, setSidebarOpen }) 
                 {initials}
               </div>
               <span className="text-[13px] font-medium hidden sm:block">
-                {user.name}
+                {displayName}
               </span>
               <ChevronDown size={14} className={`transition-transform duration-200 text-white/50 ${drop ? 'rotate-180' : ''}`} />
             </button>
@@ -125,7 +128,7 @@ export default function Navbar({ user, onLogout, sidebarOpen, setSidebarOpen }) 
             {drop && (
               <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-lg shadow-lg w-48 overflow-hidden z-[200] animate-in fade-in zoom-in-95 duration-200">
                 <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-                  <div className="font-semibold text-[13px] text-slate-900 truncate">{user.name}</div>
+                  <div className="font-semibold text-[13px] text-slate-900 truncate">{displayName}</div>
                   <div className="text-[11.5px] text-slate-500 mt-0.5">{user.role}</div>
                 </div>
                 <div className="p-1.5">
