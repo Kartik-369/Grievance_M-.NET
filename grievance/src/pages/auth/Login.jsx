@@ -3,6 +3,29 @@ import { Eye, EyeOff } from 'lucide-react'
 
 const ROLES = ['Admin', 'Student']
 
+const MOCK_USERS = {
+  Admin: {
+    userId: 1,
+    firstName: 'Kartik',
+    lastName: 'Admin',
+    name: 'Kartik',
+    email: 'admin@gms.com',
+    role: 'Admin',
+    roleId: 1,
+    isActive: true,
+  },
+  Student: {
+    userId: 2,
+    firstName: 'Kartik',
+    lastName: 'Student',
+    name: 'Kartik',
+    email: 'student@gms.com',
+    role: 'Student',
+    roleId: 2,
+    isActive: true,
+  },
+}
+
 export default function Login({ onLogin }) {
   const [role,     setRole]     = useState('Student')
   const [password, setPassword] = useState('')
@@ -20,7 +43,7 @@ export default function Login({ onLogin }) {
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
-      onLogin(role)
+      onLogin(MOCK_USERS[role])
     }, 400)
   }
 
@@ -47,7 +70,7 @@ export default function Login({ onLogin }) {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-7">
-          <div className="mb-5.5">
+          <div className="mb-5">
             <div className="text-[15px] font-bold text-slate-900">Sign in</div>
           </div>
 
@@ -61,8 +84,8 @@ export default function Login({ onLogin }) {
                     type="button"
                     onClick={() => handleRoleSelect(r)}
                     className={`px-1 py-2 rounded-md text-[13px] font-semibold transition-all border-[1.5px] ${
-                      role === r 
-                        ? 'border-blue-600 bg-blue-50 text-blue-700' 
+                      role === r
+                        ? 'border-blue-600 bg-blue-50 text-blue-700'
                         : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
                     }`}
                   >
