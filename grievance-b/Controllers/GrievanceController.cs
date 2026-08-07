@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
@@ -41,6 +41,59 @@ namespace grievance_b.Controllers
             }
 
             return Ok(grievance);
+        }
+        #endregion
+
+        #region Create Grievance
+        [HttpPost]
+        public async Task<IActionResult> Create(Grievances grievance)
+        {
+            await _context.Grievances.AddAsync(grievance);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        #endregion
+
+        #region Update Grievance
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, Grievances grievance)
+        {
+            if (id != grievance.GrievanceId)
+            {
+                return BadRequest();
+            }
+            
+            var existingGrievance = await _context.Grievances.FindAsync(id);
+            if (existingGrievance == null)
+            {
+                return NotFound();
+            }
+
+            existingGrievance.RaisedBy = grievance.RaisedBy;
+            existingGrievance.CategoryId = grievance.CategoryId;
+            existingGrievance.Title = grievance.Title;
+            existingGrievance.Description = grievance.Description;
+            existingGrievance.StatusId = grievance.StatusId;
+            existingGrievance.PriorityId = grievance.PriorityId;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+        #endregion
+        #region Delete Grievance
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var grievance = await _context.Grievances.FindAsync(id);
+            if (grievance == null)
+            {
+                return NotFound();
+            }
+
+            _context.Grievances.Remove(grievance);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
         #endregion
     }
