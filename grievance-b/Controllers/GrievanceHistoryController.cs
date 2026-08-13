@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
+using grievance_b.DTOs;
 
 namespace grievance_b.Controllers
 {
@@ -23,7 +24,20 @@ namespace grievance_b.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllGrievanceHistory()
         {
-            var histories = await _context.GrievanceStatusHistory.ToListAsync();
+            var histories = await _context.GrievanceStatusHistory
+                .Include(x => x.StatusNavigation) 
+                .Select(x => new GrievanceStatusHistoryDTO
+                {
+                    StatusHistoryId = x.StatusHistoryId,
+                    GrievanceId = x.GrievanceId,
+                    Status = x.Status,
+                    StatusName = x.StatusNavigation.StatusName, 
+                    Remarks = x.Remarks,
+                    UpdatedBy = x.UpdatedBy,
+                    UpdatedOn = x.UpdatedOn
+                })
+                .ToListAsync();
+                
             return Ok(histories);
         }
         #endregion

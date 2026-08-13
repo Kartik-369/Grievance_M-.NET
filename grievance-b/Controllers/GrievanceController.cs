@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
+using grievance_b.DTOs;
 
 namespace grievance_b.Controllers
 {
@@ -23,7 +24,21 @@ namespace grievance_b.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllGrievances()
         {
-            var grievances = await _context.Grievances.ToListAsync();
+            var grievances = await _context.Grievances
+                .Include(x => x.GrievanceCategories)
+                .Select(x => new GrievanceDTO
+                {
+                    GrievanceId = x.GrievanceId,
+                    Title = x.Title,
+                    Description = x.Description,
+                    RaisedBy = x.RaisedBy,
+                    CategoryId = x.CategoryId,
+                    CategoryName = x.GrievanceCategories.CategoryName,
+                    StatusId = x.StatusId,
+                    PriorityId = x.PriorityId
+                })
+                .ToListAsync();
+
             return Ok(grievances);
         }
         #endregion
@@ -62,7 +77,7 @@ namespace grievance_b.Controllers
             {
                 return BadRequest();
             }
-            
+
             var existingGrievance = await _context.Grievances.FindAsync(id);
             if (existingGrievance == null)
             {
