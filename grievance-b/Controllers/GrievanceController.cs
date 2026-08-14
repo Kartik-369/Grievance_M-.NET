@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
 using grievance_b.DTOs;
+using grievance_b.Common;
 
 namespace grievance_b.Controllers
 {
@@ -39,7 +40,11 @@ namespace grievance_b.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(grievances);
+            return Ok(new ApiResponse<List<GrievanceDTO>>{
+                Success=true,
+                Message="Grievances Retrieved Successfully",
+                Data=grievances
+            });
         }
         #endregion
 
@@ -48,24 +53,60 @@ namespace grievance_b.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGrievanceById(int id)
         {
-            var grievance = await _context.Grievances.FindAsync(id);
+            var grievance = await _context.Grievances
+                .Include(x => x.GrievanceCategories) // Include related entity
+                .FirstOrDefaultAsync(x => x.GrievanceId == id); // Use FirstOrDefaultAsync with a condition
 
             if (grievance == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<object>{
+                   Success=false,
+                   Message="Grievance Not Found",
+                   Errors=new List<string>{"No Record of such Grievanc"}
+                });
             }
 
-            return Ok(grievance);
+            var grievanceDto = new GrievanceDTO
+            {
+                GrievanceId = grievance.GrievanceId,
+                Title = grievance.Title,
+                Description = grievance.Description,
+                RaisedBy = grievance.RaisedBy,
+                CategoryId = grievance.CategoryId,
+                CategoryName = grievance.GrievanceCategories.CategoryName,
+                StatusId = grievance.StatusId,
+                PriorityId = grievance.PriorityId
+            };
+
+            return Ok(new ApiResponse<GrievanceDTO>{
+                Success=true,
+                Message="Grievance Found",
+                Data=grievanceDto
+            });
         }
         #endregion
 
         #region Create Grievance
         [HttpPost]
-        public async Task<IActionResult> Create(Grievances grievance)
+        public async Task<IActionResult> Create(GrievanceDTO grievance)
         {
-            await _context.Grievances.AddAsync(grievance);
+            var gri=new Grievances(){
+                GrievanceId=grievance.GrievanceId,
+                Title=grievance.Title,
+                Description=grievance.Description,
+                RaisedBy=grievance.RaisedBy,
+                CategoryId=grievance.CategoryId,
+                StatusId=grievance.StatusId,
+                PriorityId=grievance.PriorityId
+            };
+            _context.Grievances.Add(gri);
             await _context.SaveChangesAsync();
-            return Ok();
+            return Ok(new ApiResponse<Grievances>
+            {
+                Success = true,
+                Message = "grievance Added Successfully",
+                Data = gri
+            });
         }
         #endregion
 
