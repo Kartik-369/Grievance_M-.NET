@@ -3,6 +3,8 @@
 .vscode/
 .vs/
 .idea/
+test.java
+test.class
 
 # --- FRONTEND (grievance) ---
 grievance/node_modules/
