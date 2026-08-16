@@ -16,9 +16,9 @@ namespace grievance_b.Models
         public string? Remarks { get; set; }
         [ForeignKey("User")]
         public int UpdatedBy { get; set; }
+        public User User { get; set; }
         public DateTime UpdatedOn { get; set; } = DateTime.Now;
         public Grievances Grievances { get; set; }
         public Status StatusNavigation { get; set; }
-        public User User { get; set; }
     }
 }

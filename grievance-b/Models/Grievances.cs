@@ -22,5 +22,7 @@ namespace grievance_b.Models
         public GrievanceCategories GrievanceCategories { get; set; }
         public Status status { get; set; }
         public Priority priority { get; set; }
+        public ICollection<GrievanceAssignments> Assignments { get; set; } = new List<GrievanceAssignments>();
+        public ICollection<GrievanceStatusHistory> StatusHistories { get; set; } = new List<GrievanceStatusHistory>();
     }
 }

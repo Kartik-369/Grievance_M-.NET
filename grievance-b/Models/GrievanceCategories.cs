@@ -8,5 +8,6 @@ namespace grievance_b.Models
         public int CategoryId { get; set; }
         public string CategoryName { get; set; } = string.Empty;
         public string CssClassName { get; set; } = string.Empty;
+        public ICollection<Grievances> Grievances { get; set; } = new List<Grievances>();
     }
 }

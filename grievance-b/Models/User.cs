@@ -18,5 +18,7 @@ namespace grievance_b.Models
         //[ForeignKey("RoleId")]
         public Roles Roles { get; set; }
         public ICollection<Grievances> Grievances { get; set; } = new List<Grievances>();
+        public ICollection<GrievanceAssignments> Assignments { get; set; } = new List<GrievanceAssignments>();
+        public ICollection<GrievanceStatusHistory> StatusUpdates { get; set; } = new List<GrievanceStatusHistory>();
     }
 }
