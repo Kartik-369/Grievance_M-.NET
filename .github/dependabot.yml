@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
 
-  # Check for backend Python/FastAPI updates
+  # Check for backend .NET/NuGet updates
   - package-ecosystem: "nuget"
     directory: "/grievance-b"
     schedule:
