@@ -5,6 +5,7 @@
 .idea/
 test.java
 test.class
+LeaveManagementApi
 
 # --- FRONTEND (grievance) ---
 grievance/node_modules/
