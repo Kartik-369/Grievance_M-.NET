@@ -1,7 +1,10 @@
-﻿namespace grievance_b.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace grievance_b.Models
 {
     public class Status
     {
+        [Key]
         public int StatusID { get; set; }
         public string StatusName { get; set; } = string.Empty;
         public string StatusCssClass { get; set; } = string.Empty;
