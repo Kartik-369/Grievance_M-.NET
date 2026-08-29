@@ -30,12 +30,12 @@ namespace grievance_b.Controllers
                 {
                     AssignmentId = x.AssignmentId,
                     GrievanceId = x.Grievances.GrievanceId,
-                    GrievanceTitle = x.Grievances.Title, 
+                    GrievanceTitle = x.Grievances.Title,
                     AssignedTo = x.AssignedTo,
                     AssignedAt = x.AssignedAt
                 })
                 .ToListAsync();
-                
+
             return Ok(assignments);
         }
         #endregion
@@ -66,29 +66,6 @@ namespace grievance_b.Controllers
         }
         #endregion
 
-        #region Update Grievance Assignment
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, GrievanceAssignments assignment)
-        {
-            if (id != assignment.AssignmentId)
-            {
-                return BadRequest();
-            }
-            
-            var existingAssignment = await _context.GrievanceAssignments.FindAsync(id);
-            if (existingAssignment == null)
-            {
-                return NotFound();
-            }
-
-            existingAssignment.GrievanceId = assignment.GrievanceId;
-            existingAssignment.AssignedTo = assignment.AssignedTo;
-            existingAssignment.AssignedAt = assignment.AssignedAt;
-
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-        #endregion
         #region Delete Grievance Assignment
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
