@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
+using grievance_b.DTOs;
+using grievance_b.Common;
 
 namespace grievance_b.Controllers
 {
@@ -23,73 +25,142 @@ namespace grievance_b.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllPriorities()
         {
-            var priorities = await _context.Priority.ToListAsync();
-            return Ok(priorities);
+            var priorities = await _context.Priority
+                .Select(x => new PriorityDTO
+                {
+                    PriorityId = x.PriorityId,
+                    PriorityName = x.PriorityName,
+                    PriorityCssClass = x.PriorityCssClass
+                })
+                .ToListAsync();
+
+            return Ok(new ApiResponse<List<PriorityDTO>>
+            {
+                Success = true,
+                Message = "Priorities Retrieved Successfully",
+                Data = priorities
+            });
         }
         #endregion
 
         #region Get Priority By ID
         // GET: api/priority/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetPriorityById(int id)
         {
             var priority = await _context.Priority.FindAsync(id);
 
             if (priority == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Priority Not Found",
+                    Errors = new List<string> { "No Record of such Priority" }
+                });
             }
 
-            return Ok(priority);
+            var priorityDto = new PriorityDTO
+            {
+                PriorityId = priority.PriorityId,
+                PriorityName = priority.PriorityName,
+                PriorityCssClass = priority.PriorityCssClass
+            };
+
+            return Ok(new ApiResponse<PriorityDTO>
+            {
+                Success = true,
+                Message = "Priority Found",
+                Data = priorityDto
+            });
         }
         #endregion
 
         #region Create Priority
         [HttpPost]
-        public async Task<IActionResult> Create(Priority priority)
+        public async Task<IActionResult> Create(PriorityDTO priority)
         {
-            await _context.Priority.AddAsync(priority);
+            var ent = new Priority()
+            {
+                PriorityName = priority.PriorityName,
+                PriorityCssClass = priority.PriorityCssClass
+            };
+
+            _context.Priority.Add(ent);
             await _context.SaveChangesAsync();
-            return Ok();
+
+            priority.PriorityId = ent.PriorityId;
+
+            return Ok(new ApiResponse<PriorityDTO>
+            {
+                Success = true,
+                Message = "Priority Added Successfully",
+                Data = priority
+            });
         }
         #endregion
 
         #region Update Priority
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Priority priority)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, PriorityDTO priority)
         {
             if (id != priority.PriorityId)
             {
-                return BadRequest();
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "ID Mismatch",
+                    Errors = new List<string> { "The ID in the URL does not match the body." }
+                });
             }
 
             var existingPriority = await _context.Priority.FindAsync(id);
             if (existingPriority == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Priority Not Found",
+                    Errors = new List<string> { "No Record of such Priority" }
+                });
             }
 
             existingPriority.PriorityName = priority.PriorityName;
             existingPriority.PriorityCssClass = priority.PriorityCssClass;
 
             await _context.SaveChangesAsync();
-            return NoContent();
+
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Priority Updated Successfully"
+            });
         }
         #endregion
+
         #region Delete Priority
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             var priority = await _context.Priority.FindAsync(id);
             if (priority == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Priority Not Found",
+                    Errors = new List<string> { "No Record of such Priority" }
+                });
             }
 
             _context.Priority.Remove(priority);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Priority Deleted Successfully"
+            });
         }
         #endregion
     }
