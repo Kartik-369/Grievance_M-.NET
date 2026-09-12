@@ -1,7 +1,10 @@
+using FluentValidation;
+using grievance_b.Common;
+using grievance_b.Data;
+using grievance_b.DTOs;
+using grievance_b.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using grievance_b.Data;
-using grievance_b.Models;
 
 namespace grievance_b.Controllers
 {
@@ -9,90 +12,86 @@ namespace grievance_b.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        #region Dependency Injected
         private readonly AppDbContext _context;
-
-        public UserController(AppDbContext context)
+        private readonly IValidator<UserDTO> _validator;
+        public UserController(AppDbContext context, IValidator<UserDTO> validator)
         {
             _context = context;
+            _validator = validator;
         }
-        #endregion
 
-        #region Get All Users
-        // GET: api/user
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _context.Users.ToListAsync();
-            return Ok(users);
+            var users = await _context.Users.Include(u => u.Roles)
+                .Select(u => new UserDTO
+                {
+                    UserId = u.UserId,
+                    RoleId = u.RoleId,
+                    RoleName = u.Roles.RoleName,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    Password = u.Password,
+                    IsActive = u.IsActive,
+                    ProfilePicturePath = u.ProfilePicturePath
+                }).ToListAsync();
+            return Ok(new ApiResponse<List<UserDTO>> { Success = true, Message = "Users Retrieved Successfully", Data = users });
         }
-        #endregion
 
-        #region Get User By ID
-        // GET: api/user/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetUserById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.UserId == id);
+            if (user == null) return NotFound(new ApiResponse<object> { Success = false, Message = "User Not Found" });
 
-            if (user == null)
+            var userDto = new UserDTO { UserId = user.UserId, RoleId = user.RoleId, RoleName = user.Roles.RoleName, FirstName = user.FirstName, LastName = user.LastName, Email = user.Email, Password = user.Password, IsActive = user.IsActive, ProfilePicturePath = user.ProfilePicturePath };
+            return Ok(new ApiResponse<UserDTO> { Success = true, Message = "User Found", Data = userDto });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(UserDTO userDto)
+        {
+            var validationResult = await _validator.ValidateAsync(userDto);
+            if (!validationResult.IsValid)
             {
-                return NotFound();
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = validationResult.Errors });
             }
 
-            return Ok(user);
-        }
-        #endregion
-
-        #region Create User
-        [HttpPost]
-        public async Task<IActionResult> Create(User user)
-        {
+            var user = new User { RoleId = userDto.RoleId, FirstName = userDto.FirstName, LastName = userDto.LastName, Email = userDto.Email, Password = userDto.Password, IsActive = userDto.IsActive, ProfilePicturePath = userDto.ProfilePicturePath };
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            return Ok();
+            userDto.UserId = user.UserId;
+            return Ok(new ApiResponse<UserDTO> { Success = true, Message = "User Created Successfully", Data = userDto });
         }
-        #endregion
 
-        #region Update User
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, User user)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, UserDTO userDto)
         {
-            if (id != user.UserId)
-            {
-                return NoContent();
-            }
+            if (id != userDto.UserId) return BadRequest(new ApiResponse<object> { Success = false, Message = "ID Mismatch" });
             var existingUser = await _context.Users.FindAsync(id);
-            if (existingUser == null)
-            {
-                return NotFound();
-            }
-            existingUser.RoleId = user.RoleId;
-            existingUser.FirstName = user.FirstName;
-            existingUser.LastName = user.LastName;
-            existingUser.Email = user.Email;
-            existingUser.Password = user.Password;
-            existingUser.IsActive = user.IsActive;
-            existingUser.ProfilePicturePath = user.ProfilePicturePath;
+            if (existingUser == null) return NotFound(new ApiResponse<object> { Success = false, Message = "User Not Found" });
+
+            existingUser.RoleId = userDto.RoleId;
+            existingUser.FirstName = userDto.FirstName;
+            existingUser.LastName = userDto.LastName;
+            existingUser.Email = userDto.Email;
+            existingUser.Password = userDto.Password;
+            existingUser.IsActive = userDto.IsActive;
+            existingUser.ProfilePicturePath = userDto.ProfilePicturePath;
             await _context.SaveChangesAsync();
-            return NoContent();
+
+            return Ok(new ApiResponse<UserDTO> { Success = true, Message = "User Updated Successfully", Data = userDto });
         }
-        #endregion
-        #region Delete User
-        [HttpDelete("{id}")]
+
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
+            if (user == null) return NotFound(new ApiResponse<object> { Success = false, Message = "User Not Found" });
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok(new ApiResponse<object> { Success = true, Message = "User Deleted Successfully" });
         }
-        #endregion
     }
 }
