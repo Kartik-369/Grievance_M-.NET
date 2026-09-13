@@ -25,19 +25,19 @@ namespace grievance_b.Controllers
         public async Task<IActionResult> GetAllGrievanceHistory()
         {
             var histories = await _context.GrievanceStatusHistory
-                .Include(x => x.StatusNavigation) 
+                .Include(x => x.StatusNavigation)
                 .Select(x => new GrievanceStatusHistoryDTO
                 {
                     StatusHistoryId = x.StatusHistoryId,
                     GrievanceId = x.GrievanceId,
                     Status = x.Status,
-                    StatusName = x.StatusNavigation.StatusName, 
+                    StatusName = x.StatusNavigation.StatusName,
                     Remarks = x.Remarks,
                     UpdatedBy = x.UpdatedBy,
                     UpdatedOn = x.UpdatedOn
                 })
                 .ToListAsync();
-                
+
             return Ok(histories);
         }
         #endregion
@@ -65,48 +65,6 @@ namespace grievance_b.Controllers
             await _context.GrievanceStatusHistory.AddAsync(history);
             await _context.SaveChangesAsync();
             return Ok();
-        }
-        #endregion
-
-        #region Update Grievance Status History
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, GrievanceStatusHistory history)
-        {
-            if (id != history.StatusHistoryId)
-            {
-                return BadRequest();
-            }
-            
-            var existingHistory = await _context.GrievanceStatusHistory.FindAsync(id);
-            if (existingHistory == null)
-            {
-                return NotFound();
-            }
-
-            existingHistory.GrievanceId = history.GrievanceId;
-            existingHistory.Status = history.Status;
-            existingHistory.Remarks = history.Remarks;
-            existingHistory.UpdatedBy = history.UpdatedBy;
-            existingHistory.UpdatedOn = history.UpdatedOn;
-
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-        #endregion
-        #region Delete Grievance Status History
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var history = await _context.GrievanceStatusHistory.FindAsync(id);
-            if (history == null)
-            {
-                return NotFound();
-            }
-
-            _context.GrievanceStatusHistory.Remove(history);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
         #endregion
     }
