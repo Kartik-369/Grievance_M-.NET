@@ -1,4 +1,5 @@
 using grievance_b.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,6 +10,7 @@ namespace grievance_b.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DashboardController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -18,34 +20,25 @@ namespace grievance_b.Controllers
             _context = context;
         }
 
-        #region 1) Display the total number of users registered in the system (Translates from Total Students)
         [HttpGet("TotalUsers")]
         public async Task<IActionResult> GetTotalUsers()
         {
             var result = await _context.Users.CountAsync();
             return Ok(result);
         }
-        #endregion
-
-        #region 2) Display the total number of roles in the system (Translates from Total Faculty)
         [HttpGet("TotalRoles")]
         public async Task<IActionResult> GetTotalRoles()
         {
             var result = await _context.Roles.CountAsync();
             return Ok(result);
         }
-        #endregion
-
-        #region 3) Display the total number of grievances available in the system (Translates from Total Projects)
+            
         [HttpGet("TotalGrievancesAvailable")]
         public async Task<IActionResult> GetTotalGrievancesAvailable()
         {
             var result = await _context.Grievances.CountAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 4) Show how many grievances belong to each status category (Translates from Task Status)
+        } 
         [HttpGet("TotalGrievanceStatus")]
         public async Task<IActionResult> GetGrievanceStatusCategories()
         {
@@ -56,10 +49,7 @@ namespace grievance_b.Controllers
                     TotalGrievances = g.Count()
                 }).ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 5) Show priority wise grievance count (Translates from Priority Task Count)
+        } 
         [HttpGet("PriorityWiseGrievanceCount")]
         public async Task<IActionResult> GetPriorityWiseGrievanceCount()
         {
@@ -70,10 +60,7 @@ namespace grievance_b.Controllers
                     TotalGrievances = g.Count()
                 }).ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 6) Show how many grievances are assigned to each user (Translates from Projects per Faculty)
+        }  
         [HttpGet("TotalGrievancesAssigned")]
         public async Task<IActionResult> GetTotalGrievancesAssigned()
         {
@@ -85,10 +72,7 @@ namespace grievance_b.Controllers
                 }).ToListAsync();
 
             return Ok(result);
-        }
-        #endregion
-
-        #region 7) Show how many grievances have been raised by each user (Translates from Tasks per Student)
+        } 
         [HttpGet("TotalGrievancesRaisedByUser")]
         public async Task<IActionResult> GetTotalGrievancesRaisedByUser()
         {
@@ -99,10 +83,7 @@ namespace grievance_b.Controllers
                     Grievances = g.Count()
                 }).ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 8) Display the top 10 users who raised the most grievances (Translates from Highest Average Score)
+        } 
         [HttpGet("Top10Complainants")]
         public async Task<IActionResult> GetTop10Complainants()
         {
@@ -117,9 +98,6 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
-
-        #region 9) Display bottom 10 users based on grievances raised (Translates from Lowest Average Score)
         [HttpGet("LowestComplainants")]
         public async Task<IActionResult> GetLowestComplainants()
         {
@@ -133,10 +111,7 @@ namespace grievance_b.Controllers
                 .Take(10)
                 .ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 10) Display unassigned grievances (Translates from Overdue Tasks)
+        } 
         [HttpGet("UnassignedGrievances")]
         public async Task<IActionResult> GetUnassignedGrievances()
         {
@@ -150,10 +125,7 @@ namespace grievance_b.Controllers
                 })
                 .ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 11) Display recent status updates in the last 7 days (Translates from Follow-up Tasks)
+        }   
         [HttpGet("RecentStatusUpdates")]
         public async Task<IActionResult> GetRecentStatusUpdates()
         {
@@ -168,9 +140,6 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
-
-        #region 12) Show how many users belong to each role (Translates from Students by Grade)
         [HttpGet("TotalUsersByRole")]
         public async Task<IActionResult> GetTotalUsersByRole()
         {
@@ -181,10 +150,7 @@ namespace grievance_b.Controllers
                     Users = g.Count()
                 }).ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 13) Show month-wise status update count (Translates from Month-wise Completed Tasks)
+        } 
         [HttpGet("TotalMonthWiseUpdates")]
         public async Task<IActionResult> GetTotalMonthWiseUpdates()
         {
@@ -203,9 +169,6 @@ namespace grievance_b.Controllers
             .ToListAsync();
             return Ok(result);
         }
-        #endregion
-
-        #region 14) Display Role Wise Active User Count.
         [HttpGet("TotalRoleWiseActiveUser")]
         public async Task<IActionResult> GetTotalRoleWiseActiveUser()
         {
@@ -219,10 +182,7 @@ namespace grievance_b.Controllers
                 .OrderByDescending(g => g.ActiveUser)
                 .ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 15) Display each role with users assigned to it.
+        } 
         [HttpGet("RoleByUsers")]
         public async Task<IActionResult> GetRoleByUsers()
         {
@@ -234,10 +194,7 @@ namespace grievance_b.Controllers
                 })
                 .ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 16) List Roles Having More Than 10 Users.
+        } 
         [HttpGet("RoleWithUsers")]
         public async Task<IActionResult> GetRoleWithUsers()
         {
@@ -250,10 +207,7 @@ namespace grievance_b.Controllers
                 .Where(g => g.TotalUsers > 10)
                 .ToListAsync();
             return Ok(result);
-        }
-        #endregion
-
-        #region 17) Display role statistics.
+        }  
         [HttpGet("RoleStatistics")]
         public async Task<IActionResult> GetRoleStatistics()
         {
@@ -269,9 +223,9 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 18) Show latest 10 grievance assignments (Translates from Tasks Due Soon)
+        
         [HttpGet("RecentAssignments")]
         public async Task<IActionResult> GetRecentAssignments()
         {
@@ -287,9 +241,9 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 19) Display each category with total grievances, resolved, and pending (Translates from Tasks Summary)
+        
         [HttpGet("CategorySummary")]
         public async Task<IActionResult> GetCategorySummary()
         {
@@ -304,9 +258,9 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 20) Display Priority breakdown for each category (Translates from Project-wise Score)
+        
         [HttpGet("CategoryPriorityStats")]
         public async Task<IActionResult> GetCategoryPriorityStats()
         {
@@ -320,9 +274,9 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 21) Display Top 5 categories with the most grievances (Translates from Top 10 Projects)
+        
         [HttpGet("TopCategories")]
         public async Task<IActionResult> GetTopCategories()
         {
@@ -337,9 +291,9 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 22) Show assignment counts per user (Translates from Faculty Project Summary)
+        
         [HttpGet("UserAssignmentSummary")]
         public async Task<IActionResult> GetUserAssignmentSummary()
         {
@@ -352,9 +306,9 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 23) Display grievance raised statistics per user (Translates from Task Completion Statistics)
+        
         [HttpGet("UserGrievanceStatistics")]
         public async Task<IActionResult> GetUserGrievanceStatistics()
         {
@@ -369,9 +323,9 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 24) Display Categories with critical priority grievances (Translates from Overdue Projects)
+        
         [HttpGet("CriticalCategories")]
         public async Task<IActionResult> GetCriticalCategories()
         {
@@ -385,9 +339,9 @@ namespace grievance_b.Controllers
                 }).ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 25) Show month-wise newly assigned grievances (Translates from Month-wise Completed Tasks - Kept Active)
+        
         [HttpGet("MonthWiseAssignments")]
         public async Task<IActionResult> GetMonthWiseAssignments()
         {
@@ -407,9 +361,9 @@ namespace grievance_b.Controllers
             .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 26) Rank users based on number of status updates applied (Translates from Rank Faculties)
+        
         [HttpGet("RankStaffByUpdates")]
         public async Task<IActionResult> GetRankStaffByUpdates()
         {
@@ -423,9 +377,9 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
 
-        #region 27) Display full statistics for every category (Translates from Task Statistics for Every Project)
+        
         [HttpGet("CategoryStatistics")]
         public async Task<IActionResult> GetCategoryStatistics()
         {
@@ -441,6 +395,6 @@ namespace grievance_b.Controllers
                 .ToListAsync();
             return Ok(result);
         }
-        #endregion
+        
     }
 }
