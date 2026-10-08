@@ -1,25 +1,30 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
+using grievance_b.Common;
+using FluentValidation;
 using grievance_b.DTOs;
 
 namespace grievance_b.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class GrievanceAssignmentController : ControllerBase
     {
-        #region Dependency Injected
         private readonly AppDbContext _context;
+        private readonly IValidator<GrievanceAssignmentDTO> _validator;
 
-        public GrievanceAssignmentController(AppDbContext context)
+        public GrievanceAssignmentController(AppDbContext context, IValidator<GrievanceAssignmentDTO> validator)
         {
             _context = context;
+            _validator = validator;
         }
-        #endregion
+        
 
-        #region Get All Grievance Assignments
+        
         // GET: api/grievanceassignment
         [HttpGet]
         public async Task<IActionResult> GetAllGrievanceAssignments()
@@ -38,11 +43,11 @@ namespace grievance_b.Controllers
 
             return Ok(assignments);
         }
-        #endregion
+        
 
-        #region Get Grievance Assignment By ID
+        
         // GET: api/grievanceassignment/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetGrievanceAssignmentById(int id)
         {
             var assignment = await _context.GrievanceAssignments.FindAsync(id);
@@ -54,20 +59,33 @@ namespace grievance_b.Controllers
 
             return Ok(assignment);
         }
-        #endregion
+        
 
-        #region Create Grievance Assignment
+        
         [HttpPost]
-        public async Task<IActionResult> Create(GrievanceAssignments assignment)
+        public async Task<IActionResult> Create(GrievanceAssignmentDTO assignmentDto)
         {
+            var validationResult = await _validator.ValidateAsync(assignmentDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = null, Errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList() });
+            }
+            
+            var assignment = new GrievanceAssignments
+            {
+                GrievanceId = assignmentDto.GrievanceId,
+                AssignedTo = assignmentDto.AssignedTo,
+                AssignedAt = assignmentDto.AssignedAt
+            };
+
             await _context.GrievanceAssignments.AddAsync(assignment);
             await _context.SaveChangesAsync();
             return Ok();
         }
-        #endregion
+        
 
-        #region Delete Grievance Assignment
-        [HttpDelete("{id}")]
+        
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             var assignment = await _context.GrievanceAssignments.FindAsync(id);
@@ -81,6 +99,6 @@ namespace grievance_b.Controllers
 
             return NoContent();
         }
-        #endregion
+        
     }
 }
