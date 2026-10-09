@@ -1,26 +1,30 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
 using grievance_b.DTOs;
 using grievance_b.Common;
+using FluentValidation;
 
 namespace grievance_b.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class GrievanceCategoryController : ControllerBase
     {
-        #region Dependency Injected
         private readonly AppDbContext _context;
+        private readonly IValidator<GrievanceCategoryDTO> _validator;
 
-        public GrievanceCategoryController(AppDbContext context)
+        public GrievanceCategoryController(AppDbContext context, IValidator<GrievanceCategoryDTO> validator)
         {
             _context = context;
+            _validator = validator;
         }
-        #endregion
+        
 
-        #region Get All Grievance Categories
+        
         // GET: api/grievancecategory
         [HttpGet]
         public async Task<IActionResult> GetAllGrievanceCategories()
@@ -41,9 +45,9 @@ namespace grievance_b.Controllers
                 Data = categories
             });
         }
-        #endregion
+        
 
-        #region Get Grievance Category By ID
+        
         // GET: api/grievancecategory/5
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetGrievanceCategoryById(int id)
@@ -74,12 +78,18 @@ namespace grievance_b.Controllers
                 Data = categoryDto
             });
         }
-        #endregion
+        
 
-        #region Create Grievance Category
+        
         [HttpPost]
         public async Task<IActionResult> Create(GrievanceCategoryDTO category)
         {
+            var validationResult = await _validator.ValidateAsync(category);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = null, Errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList() });
+            }
+
             var ent = new GrievanceCategories()
             {
                 CategoryName = category.CategoryName,
@@ -98,9 +108,9 @@ namespace grievance_b.Controllers
                 Data = category
             });
         }
-        #endregion
+        
 
-        #region Update Grievance Category
+        
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, GrievanceCategoryDTO category)
         {
@@ -112,6 +122,12 @@ namespace grievance_b.Controllers
                     Message = "ID Mismatch",
                     Errors = new List<string> { "The ID in the URL does not match the body." }
                 });
+            }
+
+            var validationResult = await _validator.ValidateAsync(category);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = null, Errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList() });
             }
 
             var existingCategory = await _context.GrievanceCategories.FindAsync(id);
@@ -136,9 +152,9 @@ namespace grievance_b.Controllers
                 Message = "Category Updated Successfully"
             });
         }
-        #endregion
+        
 
-        #region Delete Grievance Category
+        
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -164,6 +180,6 @@ namespace grievance_b.Controllers
                 Message = "Category Deleted Successfully"
             });
         }
-        #endregion
+        
     }
 }
