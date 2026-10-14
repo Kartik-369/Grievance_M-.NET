@@ -1,25 +1,30 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
 using grievance_b.DTOs;
+using grievance_b.Common;
+using FluentValidation;
 
 namespace grievance_b.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class GrievanceHistoryController : ControllerBase
     {
-        #region Dependency Injected
         private readonly AppDbContext _context;
+        private readonly IValidator<GrievanceStatusHistoryDTO> _validator;
 
-        public GrievanceHistoryController(AppDbContext context)
+        public GrievanceHistoryController(AppDbContext context, IValidator<GrievanceStatusHistoryDTO> validator)
         {
             _context = context;
+            _validator = validator;
         }
-        #endregion
+        
 
-        #region Get All Grievance Status History
+        
         // GET: api/grievancehistory
         [HttpGet]
         public async Task<IActionResult> GetAllGrievanceHistory()
@@ -40,11 +45,11 @@ namespace grievance_b.Controllers
 
             return Ok(histories);
         }
-        #endregion
+        
 
-        #region Get Grievance Status History By ID
+        
         // GET: api/grievancehistory/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetGrievanceHistoryById(int id)
         {
             var history = await _context.GrievanceStatusHistory.FindAsync(id);
@@ -56,16 +61,31 @@ namespace grievance_b.Controllers
 
             return Ok(history);
         }
-        #endregion
+        
 
-        #region Create Grievance Status History
+        
         [HttpPost]
-        public async Task<IActionResult> Create(GrievanceStatusHistory history)
+        public async Task<IActionResult> Create(GrievanceStatusHistoryDTO historyDto)
         {
+            var validationResult = await _validator.ValidateAsync(historyDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = null, Errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList() });
+            }
+            
+            var history = new GrievanceStatusHistory
+            {
+                GrievanceId = historyDto.GrievanceId,
+                Status = historyDto.Status,
+                Remarks = historyDto.Remarks,
+                UpdatedBy = historyDto.UpdatedBy,
+                UpdatedOn = historyDto.UpdatedOn
+            };
+
             await _context.GrievanceStatusHistory.AddAsync(history);
             await _context.SaveChangesAsync();
             return Ok();
         }
-        #endregion
+        
     }
 }
