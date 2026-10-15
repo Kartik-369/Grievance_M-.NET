@@ -1,28 +1,38 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
 using grievance_b.DTOs;
 using grievance_b.Common;
+using FluentValidation;
+using Asp.Versioning;
 
 namespace grievance_b.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
+    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class PriorityController : ControllerBase
     {
-        #region Dependency Injected
         private readonly AppDbContext _context;
+        private readonly IValidator<PriorityDTO> _validator;
 
-        public PriorityController(AppDbContext context)
+        public PriorityController(AppDbContext context, IValidator<PriorityDTO> validator)
         {
             _context = context;
+            _validator = validator;
         }
-        #endregion
+        
 
-        #region Get All Priorities
+        
+        // GET: api/priority
         // GET: api/priority
         [HttpGet]
+        [MapToApiVersion("1.0")]
         public async Task<IActionResult> GetAllPriorities()
         {
             var priorities = await _context.Priority
@@ -37,13 +47,36 @@ namespace grievance_b.Controllers
             return Ok(new ApiResponse<List<PriorityDTO>>
             {
                 Success = true,
-                Message = "Priorities Retrieved Successfully",
+                Message = "Priorities Retrieved Successfully (v1)",
                 Data = priorities
             });
         }
-        #endregion
 
-        #region Get Priority By ID
+        [HttpGet]
+        [MapToApiVersion("2.0")]
+        public async Task<IActionResult> GetAllPrioritiesV2()
+        {
+            var priorities = await _context.Priority
+                .Select(x => new 
+                {
+                    Id = x.PriorityId,
+                    Name = x.PriorityName,
+                    BadgeStyle = x.PriorityCssClass,
+                    AdditionalInfo = "This is from API Version 2.0!"
+                })
+                .ToListAsync();
+
+            return Ok(new 
+            {
+                Success = true,
+                Message = "Priorities Retrieved Successfully (v2)",
+                Data = priorities,
+                Version = "2.0"
+            });
+        }
+        
+
+        
         // GET: api/priority/5
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetPriorityById(int id)
@@ -74,12 +107,18 @@ namespace grievance_b.Controllers
                 Data = priorityDto
             });
         }
-        #endregion
+        
 
-        #region Create Priority
+        
         [HttpPost]
         public async Task<IActionResult> Create(PriorityDTO priority)
         {
+            var validationResult = await _validator.ValidateAsync(priority);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = null, Errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList() });
+            }
+
             var ent = new Priority()
             {
                 PriorityName = priority.PriorityName,
@@ -98,9 +137,9 @@ namespace grievance_b.Controllers
                 Data = priority
             });
         }
-        #endregion
+        
 
-        #region Update Priority
+        
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, PriorityDTO priority)
         {
@@ -112,6 +151,12 @@ namespace grievance_b.Controllers
                     Message = "ID Mismatch",
                     Errors = new List<string> { "The ID in the URL does not match the body." }
                 });
+            }
+
+            var validationResult = await _validator.ValidateAsync(priority);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = null, Errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList() });
             }
 
             var existingPriority = await _context.Priority.FindAsync(id);
@@ -136,9 +181,9 @@ namespace grievance_b.Controllers
                 Message = "Priority Updated Successfully"
             });
         }
-        #endregion
+        
 
-        #region Delete Priority
+        
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -162,6 +207,6 @@ namespace grievance_b.Controllers
                 Message = "Priority Deleted Successfully"
             });
         }
-        #endregion
+        
     }
 }
