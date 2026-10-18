@@ -1,26 +1,30 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
 using grievance_b.Models;
 using grievance_b.DTOs;
 using grievance_b.Common;
+using FluentValidation;
 
 namespace grievance_b.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class RoleController : ControllerBase
     {
-        #region Dependency Injected
         private readonly AppDbContext _context;
+        private readonly IValidator<RoleDTO> _validator;
 
-        public RoleController(AppDbContext context)
+        public RoleController(AppDbContext context, IValidator<RoleDTO> validator)
         {
             _context = context;
+            _validator = validator;
         }
-        #endregion
+        
 
-        #region Get All Roles
+        
         // GET: api/role
         [HttpGet]
         public async Task<IActionResult> GetAllRoles()
@@ -41,9 +45,9 @@ namespace grievance_b.Controllers
                 Data = roles
             });
         }
-        #endregion
+        
 
-        #region Get Role By ID
+        
         // GET: api/role/5
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetRoleById(int id)
@@ -74,12 +78,18 @@ namespace grievance_b.Controllers
                 Data = roleDto
             });
         }
-        #endregion
+        
 
-        #region Create Role
+        
         [HttpPost]
         public async Task<IActionResult> Create(RoleDTO role)
         {
+            var validationResult = await _validator.ValidateAsync(role);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = null, Errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList() });
+            }
+
             var ent = new Roles()
             {
                 RoleName = role.RoleName,
@@ -98,9 +108,9 @@ namespace grievance_b.Controllers
                 Data = role
             });
         }
-        #endregion
+        
 
-        #region Update Role
+        
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, RoleDTO role)
         {
@@ -112,6 +122,12 @@ namespace grievance_b.Controllers
                     Message = "ID Mismatch",
                     Errors = new List<string> { "The ID in the URL does not match the body." }
                 });
+            }
+
+            var validationResult = await _validator.ValidateAsync(role);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Validation Failed", Data = null, Errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList() });
             }
 
             var existingRole = await _context.Roles.FindAsync(id);
@@ -136,9 +152,9 @@ namespace grievance_b.Controllers
                 Message = "Role Updated Successfully"
             });
         }
-        #endregion
+        
 
-        #region Delete Role
+        
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -162,9 +178,9 @@ namespace grievance_b.Controllers
                 Message = "Role Deleted Successfully"
             });
         }
-        #endregion
+        
 
-        #region
+        
         [HttpGet("dropdown")]
         public async Task<IActionResult> GetAllRolesD()
         {
@@ -183,6 +199,6 @@ namespace grievance_b.Controllers
                 Data = roles
             });
         }
-        #endregion
+        
     }
 }
