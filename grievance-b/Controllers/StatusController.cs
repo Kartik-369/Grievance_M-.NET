@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using grievance_b.Data;
@@ -9,10 +10,11 @@ using FluentValidation;
 namespace grievance_b.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     public class StatusController : ControllerBase
     {
-        #region Dependency Injected
+        
         private readonly AppDbContext _context;
         private readonly IValidator<StatusDTO> _validator;
 
@@ -22,9 +24,9 @@ namespace grievance_b.Controllers
             _validator = validator;
             _context = context;
         }
-        #endregion
+        
 
-        #region Get All Statuses
+        
         // GET: api/status
         [HttpGet]
         public async Task<IActionResult> GetAllStatuses()
@@ -45,9 +47,9 @@ namespace grievance_b.Controllers
                 Data = statuses
             });
         }
-        #endregion
+        
 
-        #region Get Status By ID
+        
         // GET: api/status/5
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetStatusById(int id)
@@ -78,9 +80,9 @@ namespace grievance_b.Controllers
                 Data = statusDto
             });
         }
-        #endregion
+        
 
-        #region Create Status
+        
         [HttpPost]
         public async Task<IActionResult> Create(StatusDTO status)
         {
@@ -112,9 +114,9 @@ namespace grievance_b.Controllers
                 Data = status
             });
         }
-        #endregion
+        
 
-        #region Update Status
+        
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, StatusDTO status)
         {
@@ -125,6 +127,17 @@ namespace grievance_b.Controllers
                     Success = false,
                     Message = "ID Mismatch",
                     Errors = new List<string> { "The ID in the URL does not match the body." }
+                });
+            }
+
+            var validationResult = await _validator.ValidateAsync(status);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Validation Failed",
+                    Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
                 });
             }
 
@@ -150,9 +163,9 @@ namespace grievance_b.Controllers
                 Message = "Status Updated Successfully"
             });
         }
-        #endregion
+        
 
-        #region Delete Status
+        
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -176,6 +189,6 @@ namespace grievance_b.Controllers
                 Message = "Status Deleted Successfully"
             });
         }
-        #endregion
+        
     }
 }
