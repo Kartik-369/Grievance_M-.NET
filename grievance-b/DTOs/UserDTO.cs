@@ -1,4 +1,6 @@
-﻿namespace grievance_b.DTOs
+using Microsoft.AspNetCore.Http;
+
+namespace grievance_b.DTOs
 {
     public class UserDTO
     {
@@ -11,5 +13,6 @@
         public string Password { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public string ProfilePicturePath { get; set; } = string.Empty;
+        public IFormFile? ProfilePicture { get; set; }
     }
 }
