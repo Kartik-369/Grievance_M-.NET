@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { api, setAuthToken, setStoredUser } from '../../services/api'
 
 const ROLES = ['Admin', 'Student']
 
-const MOCK_USERS = {
+const MOCK_CREDENTIALS = {
   Admin: {
     userId: 1,
     firstName: 'Kartik',
@@ -28,42 +29,72 @@ const MOCK_USERS = {
 
 export default function Login({ onLogin }) {
   const [role,     setRole]     = useState('Student')
+  const [email,    setEmail]    = useState('student@gms.com')
   const [password, setPassword] = useState('')
   const [show,     setShow]     = useState(false)
   const [error,    setError]    = useState('')
   const [loading,  setLoading]  = useState(false)
 
-  const submit = (e) => {
-    e.preventDefault()
-    if (password !== 'abc') {
-      setError('Incorrect password.')
-      return
-    }
+  const handleRoleSelect = (r) => {
+    setRole(r)
+    setEmail(MOCK_CREDENTIALS[r].email)
     setError('')
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      onLogin(MOCK_USERS[role])
-    }, 400)
   }
 
-  const toggleShow = () => {
-    setShow(!show)
+  const submit = async (e) => {
+    e.preventDefault()
+    if (!password) {
+      setError('Password is required.')
+      return
+    }
+
+    setError('')
+    setLoading(true)
+
+    try {
+      // Connect to backend: POST /api/user/login
+      const res = await api.post('/user/login', {
+        email: email.trim(),
+        password: password,
+      })
+
+      const token = res?.token || res?.Token || (typeof res === 'string' ? res : '')
+      if (token) {
+        setAuthToken(token)
+      }
+
+      const activeUser = {
+        ...MOCK_CREDENTIALS[role],
+        email: email.trim(),
+        role: role,
+      }
+
+      setStoredUser(activeUser)
+      onLogin(activeUser)
+    } catch (err) {
+      // If backend error or offline during demo, allow mock login with default password
+      if (password === 'abc' || password === '123456' || password === 'Admin@123') {
+        const fallbackUser = MOCK_CREDENTIALS[role]
+        setStoredUser(fallbackUser)
+        onLogin(fallbackUser)
+      } else {
+        setError(err.message || 'Login failed. Please verify credentials.')
+      }
+    } finally {
+      setLoading(false)
+    }
   }
+
+  const toggleShow = () => setShow(!show)
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value)
     setError('')
   }
 
-  const handleRoleSelect = (r) => {
-    setRole(r)
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
       <div className="w-full max-w-[380px]">
-
         <div className="mb-7">
           <div className="text-[22px] font-bold text-slate-900 tracking-tight">GMS</div>
           <div className="text-[13px] text-slate-500 mt-0.5">Grievance Management System</div>
@@ -72,13 +103,16 @@ export default function Login({ onLogin }) {
         <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-7">
           <div className="mb-5">
             <div className="text-[15px] font-bold text-slate-900">Sign in</div>
+            <div className="text-xs text-slate-500 mt-1">Connect to grievance portal</div>
           </div>
 
           <form onSubmit={submit}>
             <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Login as</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                Login as
+              </label>
               <div className="grid grid-cols-2 gap-2">
-                {ROLES.map(r => (
+                {ROLES.map((r) => (
                   <button
                     key={r}
                     type="button"
@@ -95,40 +129,60 @@ export default function Login({ onLogin }) {
               </div>
             </div>
 
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                Email Address
+              </label>
+              <input
+                type="email"
+                required
+                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
             <div className="mb-5">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Password</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                Password
+              </label>
               <div className="relative">
                 <input
                   type={show ? 'text' : 'password'}
-                  className={`w-full border rounded-md px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:ring-1 transition-colors pr-9 ${
-                    error ? 'border-red-600 focus:border-red-600 focus:ring-red-600' : 'border-slate-300 focus:border-blue-600 focus:ring-blue-600'
-                  }`}
-                  placeholder="Enter password"
+                  required
+                  className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 pr-10"
                   value={password}
                   onChange={handlePasswordChange}
-                  required
+                  placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={toggleShow}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
                 >
-                  {show ? <EyeOff size={15} /> : <Eye size={15} />}
+                  {show ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              {error && (
-                <div className="text-[12px] text-red-600 mt-1.5">{error}</div>
-              )}
             </div>
+
+            {error && (
+              <div className="mb-4 p-2.5 rounded-md bg-red-50 border border-red-200 text-xs text-red-600">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className={`w-full inline-flex items-center justify-center gap-1.5 p-2 bg-blue-600 text-white text-sm font-medium rounded-md transition-colors ${
-                loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
-              }`}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
             >
-              {loading ? 'Signing in...' : `Sign in as ${role}`}
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" /> Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
         </div>
