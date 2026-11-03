@@ -1,5 +1,5 @@
 import { api } from '../../services/api'
-import { GRIEVANCES } from '../../data/dummy'
+import { CATEGORIES, STATUSES, PRIORITIES, GRIEVANCES } from '../../data/dummy'
 
 export async function fetchGrievances({
   pageNumber = 1,
@@ -27,4 +27,20 @@ export async function fetchGrievances({
 export async function fetchGrievanceById(id) {
   const numericId = typeof id === 'string' && id.startsWith('GRV-') ? id.replace('GRV-', '') : id
   return await api.get(`/grievance/${numericId}`)
+}
+
+export async function createGrievance(payload) {
+  return await api.post('/grievance', payload)
+}
+
+export async function fetchCategories() {
+  try { return await api.get('/grievancecategory') } catch { return CATEGORIES }
+}
+
+export async function fetchStatuses() {
+  try { return await api.get('/status') } catch { return STATUSES }
+}
+
+export async function fetchPriorities() {
+  try { return await api.get('/priority') } catch { return PRIORITIES }
 }
