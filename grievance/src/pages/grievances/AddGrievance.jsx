@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
 import { fetchCategories, fetchPriorities } from './grievanceApi'
 
 export default function AddGrievance({ user }) {
@@ -9,6 +9,7 @@ export default function AddGrievance({ user }) {
   const [priorities, setPriorities] = useState([])
   const [loadingMeta, setLoadingMeta] = useState(true)
   const [form, setForm] = useState({ title: '', categoryId: '', priorityId: '', description: '' })
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     async function load() {
@@ -21,17 +22,31 @@ export default function AddGrievance({ user }) {
     load()
   }, [])
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k, v) => {
+    setForm(f => ({ ...f, [k]: v }))
+    if (errors[k]) setErrors(e => ({ ...e, [k]: null }))
+  }
+
+  const validate = () => {
+    const e = {}
+    if (!form.title.trim()) e.title = 'Title is required'
+    else if (form.title.trim().length > 200) e.title = 'Title cannot exceed 200 characters'
+    if (!form.categoryId) e.categoryId = 'Please select a category'
+    if (!form.priorityId) e.priorityId = 'Please select a priority'
+    if (!form.description.trim()) e.description = 'Description is required'
+    return e
+  }
+
   const goBack = () => navigate(-1)
 
   return (
-    <div className="animate-in fade-in duration-200 max-w-2xl">
+    <div className="max-w-2xl">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={goBack} className="p-1.5 text-slate-500 hover:text-slate-900 rounded"><ArrowLeft size={16} /></button>
-        <div className="text-lg font-bold text-slate-900">New Grievance</div>
+        <button onClick={goBack}><ArrowLeft size={16} /></button>
+        <div className="text-lg font-bold">New Grievance</div>
       </div>
-      <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
-        <div className="text-xs text-slate-500 mb-4">{loadingMeta ? 'Loading metadata...' : 'Fill out details to submit'}</div>
+      <div className="bg-white border p-6 rounded">
+        <div>Title: <input value={form.title} onChange={e => set('title', e.target.value)} /></div>
       </div>
     </div>
   )
