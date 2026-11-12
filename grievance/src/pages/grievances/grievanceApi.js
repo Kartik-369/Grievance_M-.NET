@@ -1,3 +1,6 @@
+let _cachedCategories = null
+let _cachedStatuses = null
+let _cachedPriorities = null
 import { api } from '../../services/api'
 import { CATEGORIES, STATUSES, PRIORITIES, GRIEVANCES } from '../../data/dummy'
 
@@ -34,14 +37,17 @@ export async function createGrievance(payload) {
 }
 
 export async function fetchCategories() {
+  if (_cachedCategories) return _cachedCategories
   try { return await api.get('/grievancecategory') } catch { return CATEGORIES }
 }
 
 export async function fetchStatuses() {
+  if (_cachedStatuses) return _cachedStatuses
   try { return await api.get('/status') } catch { return STATUSES }
 }
 
 export async function fetchPriorities() {
+  if (_cachedPriorities) return _cachedPriorities
   try { return await api.get('/priority') } catch { return PRIORITIES }
 }
 
@@ -91,3 +97,4 @@ export async function fetchAdminUsers() {
     return [{ userId: 1, firstName: 'Kartik', lastName: 'Admin', email: 'admin@gms.com' }]
   }
 }
+
