@@ -116,7 +116,8 @@ export default function AddGrievance({ user }) {
     )
   }
 
-  
+  const titleCharsLeft = 200 - form.title.length
+
   return (
     <div className="animate-in fade-in duration-200 max-w-2xl mx-auto lg:mx-0">
       <div className="flex items-center gap-3 mb-6">
@@ -259,4 +260,3 @@ export default function AddGrievance({ user }) {
     </div>
   )
 }
-
