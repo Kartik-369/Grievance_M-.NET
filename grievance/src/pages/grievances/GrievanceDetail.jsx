@@ -1,4 +1,3 @@
-// Optimistic update active
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
@@ -132,7 +131,9 @@ export default function GrievanceDetail({ user }) {
     setAssignments(freshAssign)
   }
 
-  const handlePrint = null
+  const handlePrint = () => {
+    window.print()
+  }
 
   const goBack = () => navigate(-1)
 
@@ -329,4 +330,3 @@ export default function GrievanceDetail({ user }) {
     </div>
   )
 }
-
